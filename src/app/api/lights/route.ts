@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   try {
     const action = req.nextUrl.searchParams.get('action')
     const color = req.nextUrl.searchParams.get('color')?.split(',').map(Number)
-    console.log(color)
+    const intensity = Number(req.nextUrl.searchParams.get('intensity'))
 
     console.log('Action received')
     console.log(`>>${action}<<`)
@@ -37,6 +37,40 @@ export async function GET(req: NextRequest) {
       console.log(turnLightsOffResponse)
       const turnOffLightsData = JSON.parse(turnLightsOffResponse)
       const success = turnOffLightsData.success
+
+      console.log(`Status: ${success}`)
+
+      return NextResponse.json(
+        { message: "success",},
+        { status: 200 }
+      )
+    } else if(action === 'warm_white') {
+      console.log(`Setting light warm white: >>${intensity}<<`)
+      const request = {
+        ips: bulbs,
+        intensity: intensity
+      }
+      const setLightsWarmWhiteResponse = await callPythonFile('set_lights_warm_white', [JSON.stringify(request)])
+      console.log(setLightsWarmWhiteResponse)
+      const setLightsWarmWhiteData = JSON.parse(setLightsWarmWhiteResponse)
+      const success = setLightsWarmWhiteData.success
+
+      console.log(`Status: ${success}`)
+
+      return NextResponse.json(
+        { message: "success",},
+        { status: 200 }
+      )
+    } else if(action === 'cold_white') {
+      console.log(`Setting light cold white: >>${intensity}<<`)
+      const request = {
+        ips: bulbs,
+        intensity: intensity
+      }
+      const setLightsColdWhiteResponse = await callPythonFile('set_lights_cold_white', [JSON.stringify(request)])
+      console.log(setLightsColdWhiteResponse)
+      const setLightsColdWhiteData = JSON.parse(setLightsColdWhiteResponse)
+      const success = setLightsColdWhiteData.success
 
       console.log(`Status: ${success}`)
 
