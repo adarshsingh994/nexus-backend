@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 
-//req is short for request
 export async function GET(req: NextRequest) {
   try {
     const action = req.nextUrl.searchParams.get('action')
@@ -93,7 +92,6 @@ export async function PATCH(req: NextRequest) {
 
 function callPythonFile(name: string, args: any[] = []): Promise<string> {
   return new Promise((resolve, reject) => {
-    // Path to Python executable in your virtual environment
     // const venvPythonPath = 'python_scripts/.venv/bin/python'; // Macbook
     const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe' // Windows
     
