@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #9c27b0, #e91e63, #f44336);
+            color: white;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #turnOn {
+            background-color: #2196f3;
+        }
+        #turnOn:hover {
+            background-color: #1e88e5;
+        }
+        #turnOn.active {
+            background-color: #ffc107;
+        }
+        #turnOff {
+            background-color: #3f51b5;
+        }
+        #turnOff:hover {
+            background-color: #3949ab;
+        }
+        #turnOff.active {
+            background-color: #607d8b;
+        }
+        #setColor {
+            background-color: #4caf50;
+        }
+        #setColor:hover {
+            background-color: #43a047;
+        }
+        .icon {
+            margin-right: 0.5rem;
+        }
+        .color-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        #colorPicker {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        #colorPicker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        #colorPicker::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Light Control</h1>
+        <div class="color-control">
+            <input type="color" id="colorPicker" value="#ffffff">
+            <button id="setColor">
+                <span class="icon">🎨</span>
+                Set color and turn on
+            </button>
+        </div>
+        <div class="button-container">
+            <button id="turnOn">
+                <span class="icon">☀️</span>
+                Turn Lights On
+            </button>
+            <button id="turnOff">
+                <span class="icon">🌙</span>
+                Turn Lights Off
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const turnOnButton = document.getElementById('turnOn');
+        const turnOffButton = document.getElementById('turnOff');
+        const setColorButton = document.getElementById('setColor');
+        const colorPicker = document.getElementById('colorPicker');
+        let isOn = false;
+
+        function toggleLights(action, color) {
+            let url = `http://localhost:3000/api/lights?action=${action}`;
+            if (color) {
+                url += `&color=${color}`;
+            }
+            
+            fetch(url, {
+                method: 'GET'
+            })
+            .then(response => {
+                if (response.ok) {
+                    isOn = action === 'on' || action === 'color';
+                    updateButtonStyles();
+                }
+            })
+            .catch(error => console.error('Error toggling lights:', error));
+        }
+
+        function updateButtonStyles() {
+            turnOnButton.classList.toggle('active', isOn);
+            turnOffButton.classList.toggle('active', !isOn);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? 
+                `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : 
+                null;
+        }
+
+        turnOnButton.addEventListener('click', () => toggleLights('on'));
+        turnOffButton.addEventListener('click', () => toggleLights('off'));
+        setColorButton.addEventListener('click', () => {
+            const rgbColor = hexToRgb(colorPicker.value);
+            if (rgbColor) {
+                toggleLights('color', rgbColor);
+            }
+        });
+    </script>
+</body>
+</html>

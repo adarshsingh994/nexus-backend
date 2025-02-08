@@ -3,28 +3,32 @@ import json
 import asyncio
 from pywizlight import wizlight, PilotBuilder
 
-async def turn_on_light(ip):
+async def set_light_color(ip, color):
     try:
         light = wizlight(ip)
-        await light.turn_on(PilotBuilder())
+        await light.turn_on(PilotBuilder(rgb= (color[0], color[1], color[2])))
         return True
     except Exception as e:
         print(f"Error with light {ip}: {str(e)}", file=sys.stderr)
         return False
 
-async def turn_on_lights(ips):
-    tasks = [turn_on_light(ip) for ip in ips]
+async def set_lights_color(ips, color):
+    tasks = [set_light_color(ip, color) for ip in ips]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     return all(results)
 
 async def main():
-    args = sys.argv[1:]  # More pythonic way to skip the first argument
-    
-    success = await turn_on_lights(args)
+    a = sys.argv[1]
+    data = json.loads(sys.argv[1])
+
+    ips = data['ips']
+    color = data['color']
+
+    success = await set_lights_color(ips, color)
     
     response = {
         'success': success,
-        'affected': args
+        'affected': ips
     }
     
     print(json.dumps(response))

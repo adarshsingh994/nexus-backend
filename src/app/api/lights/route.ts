@@ -5,9 +5,11 @@ import { spawn } from 'child_process'
 export async function GET(req: NextRequest) {
   try {
     const action = req.nextUrl.searchParams.get('action')
+    const color = req.nextUrl.searchParams.get('color')?.split(',').map(Number)
+    console.log(color)
 
+    console.log('Action received')
     console.log(`>>${action}<<`)
-    console.log('Action reveived')
 
     // console.log('Gettinig all the lights in the network')
     // const getLightsResponse = await callPythonFile('get_lights')
@@ -33,8 +35,26 @@ export async function GET(req: NextRequest) {
     } else if(action === 'off') {
       console.log('Turning off lights')
       const turnLightsOffResponse = await callPythonFile('turn_off_lights', bulbs)
+      console.log(turnLightsOffResponse)
       const turnOffLightsData = JSON.parse(turnLightsOffResponse)
       const success = turnOffLightsData.success
+
+      console.log(`Status: ${success}`)
+
+      return NextResponse.json(
+        { message: "success",},
+        { status: 200 }
+      )
+    } else if(action === 'color') {
+      console.log(`Changing light color: >>${color}<<`)
+      const request = {
+        ips: bulbs,
+        color: color
+      }
+      const changeLightColorResponse = await callPythonFile('set_lights_color', [JSON.stringify(request)])
+      console.log(changeLightColorResponse)
+      const changeLightColorData = JSON.parse(changeLightColorResponse)
+      const success = changeLightColorData.success
 
       console.log(`Status: ${success}`)
 
@@ -74,7 +94,8 @@ export async function PATCH(req: NextRequest) {
 function callPythonFile(name: string, args: any[] = []): Promise<string> {
   return new Promise((resolve, reject) => {
     // Path to Python executable in your virtual environment
-    const venvPythonPath = 'python_scripts/.venv/bin/python';
+    // const venvPythonPath = 'python_scripts/.venv/bin/python'; // Macbook
+    const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe' // Windows
     
     const scriptArgs = [`python_scripts/${name}.py`, ...args.map(arg => String(arg))];
     const pythonProcess = spawn(venvPythonPath, scriptArgs);
@@ -99,55 +120,3 @@ function callPythonFile(name: string, args: any[] = []): Promise<string> {
     });
   });
 }
-
-// function callPythonFile(name: string, args: any[] = []): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     // If no args provided, only the script name will be in scriptArgs
-//     const scriptArgs = [`python_scripts/${name}.py`, ...args.map(arg => String(arg))];
-//     const pythonProcess = spawn('python3', scriptArgs);
-
-//     let output = "";
-//     let error = "";
-
-//     pythonProcess.stdout.on("data", (data) => {
-//       output += data.toString();
-//     });
-
-//     pythonProcess.stderr.on("data", (data) => {
-//       error += data.toString();
-//     });
-
-//     pythonProcess.on("close", (code) => {
-//       if (code === 0) {
-//         resolve(output.trim());
-//       } else {
-//         reject(new Error(`Python script exited with code ${code}: ${error.trim()}`));
-//       }
-//     });
-//   });
-// }
-
-// function callPythonFile(name: string): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//       const pythonProcess = spawn('python3', [`python_scripts/${name}.py`]);
-
-//       let output = "";
-//       let error = "";
-
-//       pythonProcess.stdout.on("data", (data) => {
-//           output += data.toString(); // Collect output data
-//       });
-
-//       pythonProcess.stderr.on("data", (data) => {
-//           error += data.toString(); // Collect error data
-//       });
-
-//       pythonProcess.on("close", (code) => {
-//           if (code === 0) {
-//               resolve(output.trim()); // Return output when script exits successfully
-//           } else {
-//               reject(new Error(`Python script exited with code ${code}: ${error.trim()}`));
-//           }
-//       });
-//   });
-// }
