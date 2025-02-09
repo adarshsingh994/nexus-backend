@@ -227,7 +227,7 @@
         let isOn = false;
 
         function toggleLights(action, color) {
-            let url = `http://localhost:3000/api/lights?action=${action}`;
+            let url = `http://192.168.18.4:3000/api/lights?action=${action}`;
             if (color) {
                 url += `&color=${color}`;
             }
@@ -267,7 +267,7 @@
 
         setWarmWhiteButton.addEventListener('click', () => {
             const intensity = warmWhiteSlider.value;
-            const url = `http://localhost:3000/api/lights?action=warm_white&intensity=${intensity}`;
+            const url = `http://192.168.18.4:3000/api/lights?action=warm_white&intensity=${intensity}`;
             fetch(url, {
                 method: 'GET'
             })
@@ -281,7 +281,7 @@
 
         setColdWhiteButton.addEventListener('click', () => {
             const intensity = coldWhiteSlider.value;
-            const url = `http://localhost:3000/api/lights?action=cold_white&intensity=${intensity}`;
+            const url = `http://192.168.18.4:3000/api/lights?action=cold_white&intensity=${intensity}`;
             fetch(url, {
                 method: 'GET'
             })
