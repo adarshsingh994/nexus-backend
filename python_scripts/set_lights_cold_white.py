@@ -1,37 +1,88 @@
 import sys
 import json
 import asyncio
+import logging
 from pywizlight import wizlight, PilotBuilder
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 async def set_light_cold_white(ip, intensity):
     try:
+        logger.info(f"Attempting to set cold white for light at IP: {ip} with intensity: {intensity}")
         light = wizlight(ip)
         await light.turn_on(PilotBuilder(cold_white=intensity))
-        return True
+        logger.info(f"Successfully set cold white for light at IP: {ip}")
+        return {
+            "success": True,
+            "ip": ip,
+            "message": f"Light set to cold white with intensity {intensity} successfully"
+        }
     except Exception as e:
-        print(f"Error with light {ip}: {str(e)}", file=sys.stderr)
-        return False
+        error_message = str(e)
+        logger.error(f"Error setting cold white for light at IP {ip}: {error_message}")
+        return {
+            "success": False,
+            "ip": ip,
+            "message": error_message
+        }
 
 async def set_lights_cold_white(ips, intensity):
+    logger.info(f"Starting to set cold white for {len(ips)} lights with intensity {intensity}")
     tasks = [set_light_cold_white(ip, intensity) for ip in ips]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-    return all(results)
+    results = await asyncio.gather(*tasks)
+    
+    overall_success = all(result["success"] for result in results)
+    logger.info(f"Operation completed. Overall success: {overall_success}")
+    
+    return {
+        "overall_success": overall_success,
+        "results": results
+    }
 
 async def main():
-    a = sys.argv[1]
-    data = json.loads(sys.argv[1])
-
-    ips = data['ips']
-    intensity = data['intensity']
-
-    success = await set_lights_cold_white(ips, intensity)
-    
-    response = {
-        'success': success,
-        'affected': ips
-    }
-    
-    print(json.dumps(response))
+    try:
+        logger.info("Parsing input parameters")
+        data = json.loads(sys.argv[1])
+        ips = data['ips']
+        intensity = data['intensity']
+        
+        logger.info(f"Received request to set cold white with intensity {intensity} for lights: {ips}")
+        
+        if not ips:
+            logger.warning("No IP addresses provided")
+            response = {
+                "overall_success": False,
+                "message": "No IP addresses provided",
+                "results": []
+            }
+        else:
+            result = await set_lights_cold_white(ips, intensity)
+            response = {
+                "overall_success": result["overall_success"],
+                "results": result["results"]
+            }
+        
+        print(json.dumps(response))
+        logger.info("Response sent")
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing JSON input: {str(e)}")
+        print(json.dumps({
+            "overall_success": False,
+            "message": f"Invalid JSON input: {str(e)}",
+            "results": []
+        }))
+    except KeyError as e:
+        logger.error(f"Missing required parameter: {str(e)}")
+        print(json.dumps({
+            "overall_success": False,
+            "message": f"Missing required parameter: {str(e)}",
+            "results": []
+        }))
 
 if __name__ == '__main__':
     if sys.platform == 'win32':

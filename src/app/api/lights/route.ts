@@ -28,30 +28,39 @@ export async function GET(req: NextRequest) {
       console.log('Turning on lights')
       const turnLightsOnResponse = await callPythonFile('turn_on_lights', bulbs)
       const turnOnLightsData = JSON.parse(turnLightsOnResponse)
-      const success = turnOnLightsData.success
-
-      console.log(`Status: ${success}`)
-
+      
+      console.log('Light operation results:', JSON.stringify(turnOnLightsData, null, 2))
+      
+      const responseStatus = turnOnLightsData.overall_success ? 200 : 207 // 207 Multi-Status for partial success
+      
       return NextResponse.json(
-        { message: "success" },
         { 
-          status: 200,
+          message: turnOnLightsData.overall_success ? "All lights turned on successfully" : "Some lights failed to turn on",
+          overall_success: turnOnLightsData.overall_success,
+          results: turnOnLightsData.results
+        },
+        { 
+          status: responseStatus,
           headers: corsHeaders
         }
       )
     } else if(action === 'off') {
       console.log('Turning off lights')
       const turnLightsOffResponse = await callPythonFile('turn_off_lights', bulbs)
-      console.log(turnLightsOffResponse)
       const turnOffLightsData = JSON.parse(turnLightsOffResponse)
-      const success = turnOffLightsData.success
-
-      console.log(`Status: ${success}`)
-
+      
+      console.log('Light operation results:', JSON.stringify(turnOffLightsData, null, 2))
+      
+      const responseStatus = turnOffLightsData.overall_success ? 200 : 207 // 207 Multi-Status for partial success
+      
       return NextResponse.json(
-        { message: "success" },
         { 
-          status: 200,
+          message: turnOffLightsData.overall_success ? "All lights turned off successfully" : "Some lights failed to turn off",
+          overall_success: turnOffLightsData.overall_success,
+          results: turnOffLightsData.results
+        },
+        { 
+          status: responseStatus,
           headers: corsHeaders
         }
       )
@@ -62,16 +71,22 @@ export async function GET(req: NextRequest) {
         intensity: intensity
       }
       const setLightsWarmWhiteResponse = await callPythonFile('set_lights_warm_white', [JSON.stringify(request)])
-      console.log(setLightsWarmWhiteResponse)
       const setLightsWarmWhiteData = JSON.parse(setLightsWarmWhiteResponse)
-      const success = setLightsWarmWhiteData.success
-
-      console.log(`Status: ${success}`)
-
+      
+      console.log('Light operation results:', JSON.stringify(setLightsWarmWhiteData, null, 2))
+      
+      const responseStatus = setLightsWarmWhiteData.overall_success ? 200 : 207 // 207 Multi-Status for partial success
+      
       return NextResponse.json(
-        { message: "success" },
         { 
-          status: 200,
+          message: setLightsWarmWhiteData.overall_success 
+            ? `All lights set to warm white with intensity ${intensity} successfully` 
+            : "Some lights failed to set warm white",
+          overall_success: setLightsWarmWhiteData.overall_success,
+          results: setLightsWarmWhiteData.results
+        },
+        { 
+          status: responseStatus,
           headers: corsHeaders
         }
       )
@@ -82,16 +97,22 @@ export async function GET(req: NextRequest) {
         intensity: intensity
       }
       const setLightsColdWhiteResponse = await callPythonFile('set_lights_cold_white', [JSON.stringify(request)])
-      console.log(setLightsColdWhiteResponse)
       const setLightsColdWhiteData = JSON.parse(setLightsColdWhiteResponse)
-      const success = setLightsColdWhiteData.success
-
-      console.log(`Status: ${success}`)
-
+      
+      console.log('Light operation results:', JSON.stringify(setLightsColdWhiteData, null, 2))
+      
+      const responseStatus = setLightsColdWhiteData.overall_success ? 200 : 207 // 207 Multi-Status for partial success
+      
       return NextResponse.json(
-        { message: "success" },
         { 
-          status: 200,
+          message: setLightsColdWhiteData.overall_success 
+            ? `All lights set to cold white with intensity ${intensity} successfully` 
+            : "Some lights failed to set cold white",
+          overall_success: setLightsColdWhiteData.overall_success,
+          results: setLightsColdWhiteData.results
+        },
+        { 
+          status: responseStatus,
           headers: corsHeaders
         }
       )
@@ -102,34 +123,46 @@ export async function GET(req: NextRequest) {
         color: color
       }
       const changeLightColorResponse = await callPythonFile('set_lights_color', [JSON.stringify(request)])
-      console.log(changeLightColorResponse)
       const changeLightColorData = JSON.parse(changeLightColorResponse)
-      const success = changeLightColorData.success
-
-      console.log(`Status: ${success}`)
-
+      
+      console.log('Light operation results:', JSON.stringify(changeLightColorData, null, 2))
+      
+      const responseStatus = changeLightColorData.overall_success ? 200 : 207 // 207 Multi-Status for partial success
+      
       return NextResponse.json(
-        { message: "success" },
         { 
-          status: 200,
+          message: changeLightColorData.overall_success 
+            ? `All lights set to RGB color (${color?.join(', ')}) successfully` 
+            : "Some lights failed to set color",
+          overall_success: changeLightColorData.overall_success,
+          results: changeLightColorData.results
+        },
+        { 
+          status: responseStatus,
           headers: corsHeaders
         }
       )
     } else {
-      console.log('Gettinig all the lights in the network')
+      console.log('Getting all the lights in the network')
       const getLightsResponse = await callPythonFile('get_lights')
       const getLightsData = JSON.parse(getLightsResponse)
+      
+      console.log('Light discovery results:', JSON.stringify(getLightsData, null, 2))
+      
       bulbs = getLightsData.bulbs
       console.log(`Bulbs ${bulbs} saved`)
+      
       return NextResponse.json(
         { 
-          message: 'Success',
+          message: getLightsData.message,
+          success: getLightsData.success,
           data: {
-            bulbs: bulbs
+            count: getLightsData.count,
+            bulbs: getLightsData.bulbs
           }
         },
         { 
-          status: 200,
+          status: getLightsData.success ? 200 : 404,
           headers: corsHeaders
         }
       )
@@ -214,11 +247,3 @@ process.on("SIGTERM", () => {
   pythonProcesses.forEach(p => p.kill());
   process.exit();
 });
-
-
-
-
-
-
-
-
