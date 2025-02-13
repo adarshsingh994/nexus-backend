@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Light Control</title>
     <style>
         :root {
@@ -15,45 +16,52 @@
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 2rem;
             min-height: 100vh;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             color: var(--text);
-            display: grid;
-            place-items: center;
         }
 
         .container {
             background: var(--surface);
             border-radius: 24px;
-            padding: 2.5rem;
-            width: 380px;
-            box-shadow: 
-                20px 20px 60px #d1d5db,
-                -20px -20px 60px #ffffff;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             margin: 0 0 2rem;
-            background: linear-gradient(135deg, var(--text) 0%, #475569 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text);
             text-align: center;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
         .section {
             background: #ffffff;
             border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 
-                inset 2px 2px 5px #f1f5f9,
-                inset -2px -2px 5px #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .section:last-child {
-            margin-bottom: 0;
+        .control-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 0.5rem;
         }
 
         .color-control {
@@ -64,32 +72,34 @@
 
         #colorPicker {
             width: 100%;
-            height: 60px;
+            height: 50px;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
             background: none;
         }
 
         #colorPicker::-webkit-color-swatch-wrapper {
             padding: 0;
-            border-radius: 12px;
+            border-radius: 8px;
         }
 
         #colorPicker::-webkit-color-swatch {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .slider-container {
-            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .slider {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
+            height: 4px;
+            border-radius: 2px;
             -webkit-appearance: none;
             background: #e2e8f0;
             margin: 1rem 0;
@@ -97,12 +107,12 @@
 
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: var(--primary);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
             transition: transform 0.2s;
         }
 
@@ -112,15 +122,15 @@
 
         button {
             width: 100%;
-            padding: 1rem;
+            padding: 0.75rem;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 500;
             color: #ffffff;
             background: var(--primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -128,16 +138,8 @@
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .icon {
-            font-size: 1.2rem;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
 
         .button-container {
@@ -150,24 +152,12 @@
             background: #ef4444;
         }
 
-        #turnOff:hover {
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
         #setWarmWhite {
             background: #f59e0b;
         }
 
-        #setWarmWhite:hover {
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        }
-
         #setColdWhite {
             background: #0ea5e9;
-        }
-
-        #setColdWhite:hover {
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
 
         #syncButton {
@@ -175,56 +165,80 @@
             margin-top: 1rem;
         }
 
-        #syncButton:hover {
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        .icon {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Light Control</h1>
-        <div class="section">
-            <div class="color-control">
-                <input type="color" id="colorPicker" value="#ffffff">
-                <button id="setColor">
-                    <span class="icon">🎨</span>
-                    Set color and turn on
-                </button>
+        <div class="grid-layout">
+            <div class="left-panel">
+                <div class="section">
+                    <div class="control-label">Color Selection</div>
+                    <div class="color-control">
+                        <input type="color" id="colorPicker" value="#ffffff">
+                        <button id="setColor">
+                            <span class="icon">🎨</span>
+                            Set Color
+                        </button>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="control-label">Warm White</div>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="warmWhiteSlider" min="0" max="255" value="255">
+                        <button id="setWarmWhite">
+                            <span class="icon">🌅</span>
+                            Set Warm White
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="section">
-            <div class="slider-container">
-                <input type="range" class="slider" id="warmWhiteSlider" min="0" max="255" value="255">
-                <button id="setWarmWhite">
-                    <span class="icon">🌅</span>
-                    Set to Warm White
-                </button>
+            <div class="right-panel">
+                <div class="section">
+                    <div class="control-label">Cold White</div>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="coldWhiteSlider" min="0" max="255" value="255">
+                        <button id="setColdWhite">
+                            <span class="icon">❄️</span>
+                            Set Cold White
+                        </button>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="control-label">Power Controls</div>
+                    <div class="button-container">
+                        <button id="turnOn">
+                            <span class="icon">☀️</span>
+                            Turn On
+                        </button>
+                        <button id="turnOff">
+                            <span class="icon">🌙</span>
+                            Turn Off
+                        </button>
+                    </div>
+                    <button id="syncButton">
+                        <span class="icon">🔄</span>
+                        Sync Status
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="section">
-            <div class="slider-container">
-                <input type="range" class="slider" id="coldWhiteSlider" min="0" max="255" value="255">
-                <button id="setColdWhite">
-                    <span class="icon">❄️</span>
-                    Set to Cold White
-                </button>
-            </div>
-        </div>
-        <div class="section">
-            <div class="button-container">
-                <button id="turnOn">
-                    <span class="icon">☀️</span>
-                    Turn On
-                </button>
-                <button id="turnOff">
-                    <span class="icon">🌙</span>
-                    Turn Off
-                </button>
-            </div>
-            <button id="syncButton">
-                <span class="icon">🔄</span>
-                Sync Status
-            </button>
         </div>
     </div>
 
