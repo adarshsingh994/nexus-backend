@@ -166,36 +166,6 @@ export async function PATCH() {
   );
 }
 
-// function callPythonFile(name: string, args: (string | number[])[] = []): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     // const venvPythonPath = 'python_scripts/.venv/bin/python'; // Macbook
-//     const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe' // Windows
-    
-//     const scriptArgs = [`python_scripts/${name}.py`, ...args.map(arg => String(arg))];
-//     const pythonProcess = spawn(venvPythonPath, scriptArgs);
-
-//     let output = "";
-//     let error = "";
-
-//     pythonProcess.stdout.on("data", (data) => {
-//       output += data.toString();
-//     });
-
-//     pythonProcess.stderr.on("data", (data) => {
-//       error += data.toString();
-//     });
-
-//     pythonProcess.on("close", (code) => {
-//       if (code === 0) {
-//         resolve(output.trim());
-//       } else {
-//         reject(new Error(`Python script exited with code ${code}: ${error.trim()}`));
-//       }
-//     });
-//   });
-// }
-
-
 function callPythonFile(name: string, args: string[] = []): Promise<string> {
   return new Promise((resolve, reject) => {
     const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe'; // Windows
