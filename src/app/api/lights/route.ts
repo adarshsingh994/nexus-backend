@@ -120,6 +120,7 @@ export async function GET(req: NextRequest) {
       const getLightsResponse = await callPythonFile('get_lights')
       const getLightsData = JSON.parse(getLightsResponse)
       bulbs = getLightsData.bulbs
+      console.log(`Bulbs ${bulbs} saved`)
       return NextResponse.json(
         { 
           message: 'Success',
@@ -128,7 +129,7 @@ export async function GET(req: NextRequest) {
           }
         },
         { 
-          status: 500,
+          status: 200,
           headers: corsHeaders
         }
       )
