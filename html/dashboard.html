@@ -169,6 +169,15 @@
         #setColdWhite:hover {
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
+
+        #syncButton {
+            background: #10b981;
+            margin-top: 1rem;
+        }
+
+        #syncButton:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -212,6 +221,10 @@
                     Turn Off
                 </button>
             </div>
+            <button id="syncButton">
+                <span class="icon">🔄</span>
+                Sync Status
+            </button>
         </div>
     </div>
 
@@ -221,6 +234,7 @@
         const setColorButton = document.getElementById('setColor');
         const setWarmWhiteButton = document.getElementById('setWarmWhite');
         const setColdWhiteButton = document.getElementById('setColdWhite');
+        const syncButton = document.getElementById('syncButton');
         const colorPicker = document.getElementById('colorPicker');
         const warmWhiteSlider = document.getElementById('warmWhiteSlider');
         const coldWhiteSlider = document.getElementById('coldWhiteSlider');
@@ -254,6 +268,28 @@
             return result ? 
                 `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : 
                 null;
+        }
+
+        function syncStatus() {
+            fetch('http://192.168.18.4:3000/api/lights', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                isOn = data.isOn;
+                if (data.color) {
+                    colorPicker.value = `#${data.color.toString(16).padStart(6, '0')}`;
+                }
+                if (data.warmWhite !== undefined) {
+                    warmWhiteSlider.value = data.warmWhite;
+                }
+                if (data.coldWhite !== undefined) {
+                    coldWhiteSlider.value = data.coldWhite;
+                }
+                updateButtonStyles();
+                console.log('Status synced:', data);
+            })
+            .catch(error => console.error('Error syncing status:', error));
         }
 
         turnOnButton.addEventListener('click', () => toggleLights('on'));
@@ -292,6 +328,11 @@
             })
             .catch(error => console.error('Error setting cold white:', error));
         });
+
+        syncButton.addEventListener('click', syncStatus);
+
+        // Initial sync when page loads
+        syncStatus();
     </script>
 </body>
 </html>
