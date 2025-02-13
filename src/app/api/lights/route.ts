@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { spawn } from 'child_process'
+import { ChildProcess, spawn } from 'child_process'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 let bulbs : string[] = []
+let pythonProcesses: ChildProcess[] = []
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
@@ -164,13 +165,49 @@ export async function PATCH() {
   );
 }
 
-function callPythonFile(name: string, args: (string | number[])[] = []): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // const venvPythonPath = 'python_scripts/.venv/bin/python'; // Macbook
-    const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe' // Windows
+// function callPythonFile(name: string, args: (string | number[])[] = []): Promise<string> {
+//   return new Promise((resolve, reject) => {
+//     // const venvPythonPath = 'python_scripts/.venv/bin/python'; // Macbook
+//     const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe' // Windows
     
-    const scriptArgs = [`python_scripts/${name}.py`, ...args.map(arg => String(arg))];
-    const pythonProcess = spawn(venvPythonPath, scriptArgs);
+//     const scriptArgs = [`python_scripts/${name}.py`, ...args.map(arg => String(arg))];
+//     const pythonProcess = spawn(venvPythonPath, scriptArgs);
+
+//     let output = "";
+//     let error = "";
+
+//     pythonProcess.stdout.on("data", (data) => {
+//       output += data.toString();
+//     });
+
+//     pythonProcess.stderr.on("data", (data) => {
+//       error += data.toString();
+//     });
+
+//     pythonProcess.on("close", (code) => {
+//       if (code === 0) {
+//         resolve(output.trim());
+//       } else {
+//         reject(new Error(`Python script exited with code ${code}: ${error.trim()}`));
+//       }
+//     });
+//   });
+// }
+
+
+function callPythonFile(name: string, args: string[] = []): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe'; // Windows
+    // const venvPythonPath = 'python_scripts/.venv/bin/python'; // macOS/Linux
+
+    const scriptPath = `python_scripts/${name}.py`;
+    const scriptArgs = [scriptPath, ...args.map(arg => String(arg))];
+
+    console.log(`Executing: ${venvPythonPath} ${scriptArgs.join(' ')}`);
+
+    const pythonProcess = spawn(venvPythonPath, scriptArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
+    
+    pythonProcesses.push(pythonProcess); // Track running processes
 
     let output = "";
     let error = "";
@@ -184,6 +221,7 @@ function callPythonFile(name: string, args: (string | number[])[] = []): Promise
     });
 
     pythonProcess.on("close", (code) => {
+      pythonProcesses = pythonProcesses.filter(p => p !== pythonProcess); // Remove from list
       if (code === 0) {
         resolve(output.trim());
       } else {
@@ -192,6 +230,19 @@ function callPythonFile(name: string, args: (string | number[])[] = []): Promise
     });
   });
 }
+
+// Kill Python processes when the server stops
+process.on("SIGINT", () => {
+  console.log("Server shutting down, terminating Python processes...");
+  pythonProcesses.forEach(p => p.kill());
+  process.exit();
+});
+
+process.on("SIGTERM", () => {
+  console.log("Server shutting down, terminating Python processes...");
+  pythonProcesses.forEach(p => p.kill());
+  process.exit();
+});
 
 
 
