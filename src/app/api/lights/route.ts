@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ChildProcess, spawn } from 'child_process'
+import http from 'http'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,39 @@ const corsHeaders = {
 
 let bulbs : string[] = []
 let pythonProcesses: ChildProcess[] = []
+let lightServiceInterval: NodeJS.Timeout | null = null
+
+// Function to call the lights API
+function callLightsApi() {
+  const options = {
+    hostname: '192.168.18.4',
+    port: 3000,
+    path: '/api/lights',
+    method: 'GET'
+  }
+
+  const req = http.request(options, (res) => {
+    let data = ''
+    res.on('data', (chunk) => {
+      data += chunk
+    })
+    res.on('end', () => {
+      console.log('Scheduled lights API call completed:', data)
+    })
+  })
+
+  req.on('error', (error) => {
+    console.error('Error in scheduled lights API call:', error)
+  })
+
+  req.end()
+}
+
+// Start the lights service
+if (!lightServiceInterval) {
+  lightServiceInterval = setInterval(callLightsApi, 2 * 60 * 1000) // 2 minutes in milliseconds
+  console.log('Lights service started - will call API every 30 minutes')
+}
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
@@ -235,15 +269,23 @@ function callPythonFile(name: string, args: string[] = []): Promise<string> {
   });
 }
 
-// Kill Python processes when the server stops
+// Clean up processes when the server stops
 process.on("SIGINT", () => {
   console.log("Server shutting down, terminating Python processes...");
+  if (lightServiceInterval) {
+    clearInterval(lightServiceInterval);
+    console.log("Lights service stopped");
+  }
   pythonProcesses.forEach(p => p.kill());
   process.exit();
 });
 
 process.on("SIGTERM", () => {
   console.log("Server shutting down, terminating Python processes...");
+  if (lightServiceInterval) {
+    clearInterval(lightServiceInterval);
+    console.log("Lights service stopped");
+  }
   pythonProcesses.forEach(p => p.kill());
   process.exit();
 });
