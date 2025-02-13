@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+let bulbs : string[] = []
+
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
@@ -19,14 +21,6 @@ export async function GET(req: NextRequest) {
 
     console.log('Action received')
     console.log(`>>${action}<<`)
-
-    // console.log('Gettinig all the lights in the network')
-    // const getLightsResponse = await callPythonFile('get_lights')
-    // const getLightsData = JSON.parse(getLightsResponse)
-    // const bulbs = getLightsData.bulbs
-
-    const bulbs = [ '192.168.18.168', '192.168.18.167' ]
-
     console.log(`Bulb ips: ${bulbs}`)
 
     if(action === 'on') {
@@ -121,8 +115,17 @@ export async function GET(req: NextRequest) {
         }
       )
     } else {
+      console.log('Gettinig all the lights in the network')
+      const getLightsResponse = await callPythonFile('get_lights')
+      const getLightsData = JSON.parse(getLightsResponse)
+      bulbs = getLightsData.bulbs
       return NextResponse.json(
-        { message: 'Incorrect action' },
+        { 
+          message: 'Success',
+          data: {
+            bulbs: bulbs
+          }
+        },
         { 
           status: 500,
           headers: corsHeaders
