@@ -19,7 +19,6 @@
             --transition: all 0.3s ease;
         }
 
-        /* Function to update theme colors */
         @property --primary {
             syntax: '<color>';
             inherits: true;
@@ -72,6 +71,13 @@
             color: var(--primary-dark);
             font-weight: 700;
             letter-spacing: -0.5px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin: 0;
+            color: var(--primary-dark);
+            text-align: center;
         }
 
         .subtitle {
@@ -235,6 +241,7 @@
             font-size: 0.85rem;
             color: var(--text-light);
             margin-bottom: 1.25rem;
+            text-align: center;
         }
 
         .color-control {
@@ -373,16 +380,6 @@
             margin-top: 1rem;
         }
 
-        .section {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                       -8px -8px 16px var(--shadow-light);
-            border: none;
-            transition: var(--transition);
-        }
-
         .footer {
             margin-top: 2rem;
             text-align: center;
@@ -500,6 +497,10 @@
                 padding-bottom: 0.35rem;
                 margin-bottom: 0.75rem;
             }
+
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) and (orientation: landscape) {
@@ -591,6 +592,119 @@
                 font-size: 0.8rem;
             }
         }
+
+        /* New styles for mood colors */
+        .mood-colors {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .color-category {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 1.5rem;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .color-grid {
+                grid-template-columns: repeat(2, 80px);
+            }
+        }
+
+        .color-btn {
+            width: 80px;
+            height: 80px;
+            padding: 0;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--surface);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .color-btn:active {
+            transform: translateY(0);
+        }
+
+        .color-indicator {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .color-btn[data-color="173,216,230"] { box-shadow: 6px 6px 12px rgba(173, 216, 230, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="0,255,255"] { box-shadow: 6px 6px 12px rgba(0, 255, 255, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="230,230,250"] { box-shadow: 6px 6px 12px rgba(230, 230, 250, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="152,251,152"] { box-shadow: 6px 6px 12px rgba(152, 251, 152, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="255,0,127"] { box-shadow: 6px 6px 12px rgba(255, 0, 127, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="255,105,180"] { box-shadow: 6px 6px 12px rgba(255, 105, 180, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="128,0,128"] { box-shadow: 6px 6px 12px rgba(128, 0, 128, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="247,231,206"] { box-shadow: 6px 6px 12px rgba(247, 231, 206, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="57,255,20"] { box-shadow: 6px 6px 12px rgba(57, 255, 20, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="125,249,255"] { box-shadow: 6px 6px 12px rgba(125, 249, 255, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="255,165,0"] { box-shadow: 6px 6px 12px rgba(255, 165, 0, 0.3), -6px -6px 12px var(--shadow-light); }
+        .color-btn[data-color="255,20,147"] { box-shadow: 6px 6px 12px rgba(255, 20, 147, 0.3), -6px -6px 12px var(--shadow-light); }
+
+        .color-btn:hover[data-color="173,216,230"] { box-shadow: 8px 8px 16px rgba(173, 216, 230, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="0,255,255"] { box-shadow: 8px 8px 16px rgba(0, 255, 255, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="230,230,250"] { box-shadow: 8px 8px 16px rgba(230, 230, 250, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="152,251,152"] { box-shadow: 8px 8px 16px rgba(152, 251, 152, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="255,0,127"] { box-shadow: 8px 8px 16px rgba(255, 0, 127, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="255,105,180"] { box-shadow: 8px 8px 16px rgba(255, 105, 180, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="128,0,128"] { box-shadow: 8px 8px 16px rgba(128, 0, 128, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="247,231,206"] { box-shadow: 8px 8px 16px rgba(247, 231, 206, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="57,255,20"] { box-shadow: 8px 8px 16px rgba(57, 255, 20, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="125,249,255"] { box-shadow: 8px 8px 16px rgba(125, 249, 255, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="255,165,0"] { box-shadow: 8px 8px 16px rgba(255, 165, 0, 0.4), -8px -8px 16px var(--shadow-light); }
+        .color-btn:hover[data-color="255,20,147"] { box-shadow: 8px 8px 16px rgba(255, 20, 147, 0.4), -8px -8px 16px var(--shadow-light); }
+
+        .color-btn:active[data-color="173,216,230"] { box-shadow: inset 4px 4px 8px rgba(173, 216, 230, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="0,255,255"] { box-shadow: inset 4px 4px 8px rgba(0, 255, 255, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="230,230,250"] { box-shadow: inset 4px 4px 8px rgba(230, 230, 250, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="152,251,152"] { box-shadow: inset 4px 4px 8px rgba(152, 251, 152, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="255,0,127"] { box-shadow: inset 4px 4px 8px rgba(255, 0, 127, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="255,105,180"] { box-shadow: inset 4px 4px 8px rgba(255, 105, 180, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="128,0,128"] { box-shadow: inset 4px 4px 8px rgba(128, 0, 128, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="247,231,206"] { box-shadow: inset 4px 4px 8px rgba(247, 231, 206, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="57,255,20"] { box-shadow: inset 4px 4px 8px rgba(57, 255, 20, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="125,249,255"] { box-shadow: inset 4px 4px 8px rgba(125, 249, 255, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="255,165,0"] { box-shadow: inset 4px 4px 8px rgba(255, 165, 0, 0.2), inset -4px -4px 8px var(--shadow-light); }
+        .color-btn:active[data-color="255,20,147"] { box-shadow: inset 4px 4px 8px rgba(255, 20, 147, 0.2), inset -4px -4px 8px var(--shadow-light); }
+
+        /* Color-specific shadows for indicators */
+        [style*="background-color: #ADD8E6"]::after { box-shadow: 4px 4px 8px rgba(173, 216, 230, 0.5); }
+        [style*="background-color: #00FFFF"]::after { box-shadow: 4px 4px 8px rgba(0, 255, 255, 0.5); }
+        [style*="background-color: #E6E6FA"]::after { box-shadow: 4px 4px 8px rgba(230, 230, 250, 0.5); }
+        [style*="background-color: #98FB98"]::after { box-shadow: 4px 4px 8px rgba(152, 251, 152, 0.5); }
+        [style*="background-color: #FF007F"]::after { box-shadow: 4px 4px 8px rgba(255, 0, 127, 0.5); }
+        [style*="background-color: #FF69B4"]::after { box-shadow: 4px 4px 8px rgba(255, 105, 180, 0.5); }
+        [style*="background-color: #800080"]::after { box-shadow: 4px 4px 8px rgba(128, 0, 128, 0.5); }
+        [style*="background-color: #F7E7CE"]::after { box-shadow: 4px 4px 8px rgba(247, 231, 206, 0.5); }
+        [style*="background-color: #39FF14"]::after { box-shadow: 4px 4px 8px rgba(57, 255, 20, 0.5); }
+        [style*="background-color: #7DF9FF"]::after { box-shadow: 4px 4px 8px rgba(125, 249, 255, 0.5); }
+        [style*="background-color: #FFA500"]::after { box-shadow: 4px 4px 8px rgba(255, 165, 0, 0.5); }
+        [style*="background-color: #FF1493"]::after { box-shadow: 4px 4px 8px rgba(255, 20, 147, 0.5); }
+
+        /* Media queries remain unchanged */
     </style>
 </head>
 <body>
@@ -631,48 +745,92 @@
                     <div class="helper-text">Choose any color from the spectrum to set your perfect ambiance</div>
                     <div class="color-control">
                         <input type="color" id="colorPicker" value="#ffffff">
-                        <button id="setColor">
-                            <span class="icon">🎨</span>
-                            Set Color
-                        </button>
                     </div>
                 </div>
                 <div class="section">
                     <div class="section-header">
-                        <div class="control-label">Warm White</div>
+                        <div class="control-label">Mood Colors</div>
                     </div>
-                    <div class="helper-text">Perfect for creating a cozy, relaxing atmosphere</div>
+                    <div class="helper-text">Choose from predefined mood-based colors</div>
+                    <div class="mood-colors">
+                        <div class="color-category">
+                            <h3>Relaxing & Calming</h3>
+                            <div class="color-grid">
+                                <button class="color-btn" data-color="173,216,230" title="Soft Blue">
+                                    <div class="color-indicator" style="background-color: #ADD8E6"></div>
+                                </button>
+                                <button class="color-btn" data-color="0,255,255" title="Aqua">
+                                    <div class="color-indicator" style="background-color: #00FFFF"></div>
+                                </button>
+                                <button class="color-btn" data-color="230,230,250" title="Lavender">
+                                    <div class="color-indicator" style="background-color: #E6E6FA"></div>
+                                </button>
+                                <button class="color-btn" data-color="152,251,152" title="Mint Green">
+                                    <div class="color-indicator" style="background-color: #98FB98"></div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="color-category">
+                            <h3>Romantic & Warm</h3>
+                            <div class="color-grid">
+                                <button class="color-btn" data-color="255,0,127" title="Rose Red">
+                                    <div class="color-indicator" style="background-color: #FF007F"></div>
+                                </button>
+                                <button class="color-btn" data-color="255,105,180" title="Warm Pink">
+                                    <div class="color-indicator" style="background-color: #FF69B4"></div>
+                                </button>
+                                <button class="color-btn" data-color="128,0,128" title="Deep Purple">
+                                    <div class="color-indicator" style="background-color: #800080"></div>
+                                </button>
+                                <button class="color-btn" data-color="247,231,206" title="Champagne">
+                                    <div class="color-indicator" style="background-color: #F7E7CE"></div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="color-category">
+                            <h3>Energetic & Vibrant</h3>
+                            <div class="color-grid">
+                                <button class="color-btn" data-color="57,255,20" title="Neon Green">
+                                    <div class="color-indicator" style="background-color: #39FF14"></div>
+                                </button>
+                                <button class="color-btn" data-color="125,249,255" title="Electric Blue">
+                                    <div class="color-indicator" style="background-color: #7DF9FF"></div>
+                                </button>
+                                <button class="color-btn" data-color="255,165,0" title="Bright Orange">
+                                    <div class="color-indicator" style="background-color: #FFA500"></div>
+                                </button>
+                                <button class="color-btn" data-color="255,20,147" title="Hot Pink">
+                                    <div class="color-indicator" style="background-color: #FF1493"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-header">
+                        <div class="control-label">White Light Control</div>
+                    </div>
+                    <div class="helper-text">Adjust the intensity of warm or cold white light</div>
                     <div class="slider-container">
                         <div class="slider-header">
                             <span>Intensity</span>
-                            <span class="slider-value" id="warmWhiteValue">100%</span>
+                            <span class="slider-value" id="whiteValue">100%</span>
                         </div>
-                        <input type="range" class="slider" id="warmWhiteSlider" min="0" max="255" value="255">
-                        <button id="setWarmWhite">
-                            <span class="icon">🌅</span>
-                            Set Warm White
-                        </button>
+                        <input type="range" class="slider" id="whiteSlider" min="0" max="255" value="255">
+                        <div style="display: flex; gap: 1rem;">
+                            <button id="setWarmWhite" style="flex: 1;">
+                                <span class="icon">🌅</span>
+                                Warm
+                            </button>
+                            <button id="setColdWhite" style="flex: 1;">
+                                <span class="icon">❄️</span>
+                                Cold
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="right-panel">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="control-label">Cold White</div>
-                    </div>
-                    <div class="helper-text">Ideal for focus and productivity</div>
-                    <div class="slider-container">
-                        <div class="slider-header">
-                            <span>Intensity</span>
-                            <span class="slider-value" id="coldWhiteValue">100%</span>
-                        </div>
-                        <input type="range" class="slider" id="coldWhiteSlider" min="0" max="255" value="255">
-                        <button id="setColdWhite">
-                            <span class="icon">❄️</span>
-                            Set Cold White
-                        </button>
-                    </div>
-                </div>
                 <div class="section">
                     <div class="section-header">
                         <div class="control-label">System Controls</div>
@@ -693,26 +851,22 @@
     <script>
         const turnOnButton = document.getElementById('turnOn');
         const turnOffButton = document.getElementById('turnOff');
-        const setColorButton = document.getElementById('setColor');
         const setWarmWhiteButton = document.getElementById('setWarmWhite');
         const setColdWhiteButton = document.getElementById('setColdWhite');
         const syncButton = document.getElementById('syncButton');
         const colorPicker = document.getElementById('colorPicker');
-        const warmWhiteSlider = document.getElementById('warmWhiteSlider');
-        const coldWhiteSlider = document.getElementById('coldWhiteSlider');
-        const warmWhiteValue = document.getElementById('warmWhiteValue');
-        const coldWhiteValue = document.getElementById('coldWhiteValue');
+        const whiteSlider = document.getElementById('whiteSlider');
+        const whiteValue = document.getElementById('whiteValue');
         const lastSync = document.getElementById('lastSync');
         const statusDots = document.querySelectorAll('.status-dot');
+        const colorButtons = document.querySelectorAll('.color-btn');
         let isOn = false;
 
-        function updateSliderValues() {
-            warmWhiteValue.textContent = Math.round((warmWhiteSlider.value / 255) * 100) + '%';
-            coldWhiteValue.textContent = Math.round((coldWhiteSlider.value / 255) * 100) + '%';
+        function updateSliderValue() {
+            whiteValue.textContent = Math.round((whiteSlider.value / 255) * 100) + '%';
         }
 
-        warmWhiteSlider.addEventListener('input', updateSliderValues);
-        coldWhiteSlider.addEventListener('input', updateSliderValues);
+        whiteSlider.addEventListener('input', updateSliderValue);
 
         function toggleLights(action, color) {
             let url = `http://192.168.18.4:3000/api/lights?action=${action}`;
@@ -771,14 +925,11 @@
                     colorPicker.value = colorHex;
                     updateThemeColors(colorHex);
                 }
-                if (data.warmWhite !== undefined) {
-                    warmWhiteSlider.value = data.warmWhite;
-                }
-                if (data.coldWhite !== undefined) {
-                    coldWhiteSlider.value = data.coldWhite;
+                if (data.warmWhite !== undefined || data.coldWhite !== undefined) {
+                    whiteSlider.value = data.warmWhite || data.coldWhite;
                 }
                 updateButtonStyles();
-                updateSliderValues();
+                updateSliderValue();
                 updateStatusDots(true);
                 updateLastSync();
                 console.log('Status synced:', data);
@@ -789,47 +940,32 @@
             });
         }
 
-        // Function to update theme colors
         function updateThemeColors(color) {
             const root = document.documentElement;
             root.style.setProperty('--primary', color);
             
-            // Calculate darker and lighter variants
             const hex = color.replace('#', '');
             const r = parseInt(hex.substr(0, 2), 16);
             const g = parseInt(hex.substr(2, 2), 16);
             const b = parseInt(hex.substr(4, 2), 16);
             
-            // Darker variant (multiply by 0.8)
             const darkR = Math.round(r * 0.8);
             const darkG = Math.round(g * 0.8);
             const darkB = Math.round(b * 0.8);
             root.style.setProperty('--primary-dark', `rgb(${darkR}, ${darkG}, ${darkB})`);
             
-            // Lighter variant (mix with white by 0.3)
             const lightR = Math.round(r + (255 - r) * 0.3);
             const lightG = Math.round(g + (255 - g) * 0.3);
             const lightB = Math.round(b + (255 - b) * 0.3);
             root.style.setProperty('--primary-light', `rgb(${lightR}, ${lightG}, ${lightB})`);
         }
 
-        // Update theme when color picker changes
-        colorPicker.addEventListener('input', (e) => {
-            updateThemeColors(e.target.value);
-        });
-
+        // Event Listeners
         turnOnButton.addEventListener('click', () => toggleLights('on'));
         turnOffButton.addEventListener('click', () => toggleLights('off'));
-        setColorButton.addEventListener('click', () => {
-            const rgbColor = hexToRgb(colorPicker.value);
-            if (rgbColor) {
-                toggleLights('color', rgbColor);
-                updateThemeColors(colorPicker.value);
-            }
-        });
 
         setWarmWhiteButton.addEventListener('click', () => {
-            const intensity = warmWhiteSlider.value;
+            const intensity = whiteSlider.value;
             const url = `http://192.168.18.4:3000/api/lights?action=warm_white&intensity=${intensity}`;
             fetch(url, {
                 method: 'GET'
@@ -847,7 +983,7 @@
         });
 
         setColdWhiteButton.addEventListener('click', () => {
-            const intensity = coldWhiteSlider.value;
+            const intensity = whiteSlider.value;
             const url = `http://192.168.18.4:3000/api/lights?action=cold_white&intensity=${intensity}`;
             fetch(url, {
                 method: 'GET'
@@ -866,8 +1002,36 @@
 
         syncButton.addEventListener('click', syncStatus);
 
+        // Color picker event listener
+        colorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            updateThemeColors(color);
+            const rgbColor = hexToRgb(color);
+            if (rgbColor) {
+                toggleLights('color', rgbColor);
+            }
+        });
+
+        // Add event listeners for mood color buttons
+        colorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const color = button.dataset.color;
+                if (color) {
+                    toggleLights('color', color);
+                    // Convert RGB to HEX for the color picker and theme
+                    const [r, g, b] = color.split(',').map(Number);
+                    const hex = '#' + [r, g, b].map(x => {
+                        const hex = x.toString(16);
+                        return hex.length === 1 ? '0' + hex : hex;
+                    }).join('');
+                    colorPicker.value = hex;
+                    updateThemeColors(hex);
+                }
+            });
+        });
+
         // Initial setup
-        updateSliderValues();
+        updateSliderValue();
         syncStatus();
     </script>
 </body>
