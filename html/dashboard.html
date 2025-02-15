@@ -5,1034 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Light Control</title>
-    <style>
-        :root {
-            --primary: #4A90E2;
-            --primary-dark: #357ABD;
-            --primary-light: #72AEF3;
-            --surface: #E0E5EC;
-            --surface-dark: #A3B1C6;
-            --text: #2D3436;
-            --text-light: #636E72;
-            --shadow-light: rgba(255, 255, 255, 0.8);
-            --shadow-dark: rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        @property --primary {
-            syntax: '<color>';
-            inherits: true;
-            initial-value: #4A90E2;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 2rem;
-            min-height: 100vh;
-            background: var(--surface);
-            color: var(--text);
-        }
-
-        .container {
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            box-shadow: 15px 15px 30px var(--shadow-dark),
-                       -15px -15px 30px var(--shadow-light);
-            border: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -0.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 2px;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin: 0 0 1rem;
-            color: var(--primary-dark);
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        h3 {
-            font-size: 1.1rem;
-            margin: 0;
-            color: var(--primary-dark);
-            text-align: center;
-        }
-
-        .subtitle {
-            color: var(--text-light);
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .power-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            background: var(--surface);
-            border-radius: 20px;
-            box-shadow: 12px 12px 24px var(--shadow-dark),
-                       -12px -12px 24px var(--shadow-light);
-            border: none;
-        }
-
-        .power-button {
-            padding: 1.25rem;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text);
-            background: var(--surface);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                       -8px -8px 16px var(--shadow-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        #turnOn {
-            color: var(--primary);
-        }
-
-        #turnOn:hover {
-            color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        #turnOff {
-            color: var(--text);
-        }
-
-        #turnOff:hover {
-            color: var(--text-light);
-            transform: translateY(-2px);
-        }
-
-        .power-button:active {
-            transform: translateY(0);
-            box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                       inset -4px -4px 8px var(--shadow-light);
-        }
-
-        .power-button.active {
-            box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                       inset -4px -4px 8px var(--shadow-light);
-            color: var(--primary);
-        }
-
-        .power-button .icon {
-            font-size: 1.5rem;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            background: var(--surface);
-            border-radius: 12px;
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                       -6px -6px 12px var(--shadow-light);
-            border: none;
-            transition: var(--transition);
-        }
-
-        .status-indicator:hover {
-            transform: translateY(-2px);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: 0 0 8px var(--primary-light);
-        }
-
-        .status-dot.offline {
-            background: var(--text-light);
-            box-shadow: none;
-        }
-
-        .status-text {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-
-        .left-panel, .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .section {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 8px 8px 16px var(--shadow-dark),
-                       -8px -8px 16px var(--shadow-light);
-            border: none;
-            transition: var(--transition);
-        }
-
-        .section:hover {
-            transform: translateY(-2px);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--surface-dark);
-        }
-
-        .control-label {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-
-        .helper-text {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 1.25rem;
-            text-align: center;
-        }
-
-        .color-control {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        #colorPicker {
-            width: 100%;
-            height: 50px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            background: var(--surface);
-            transition: var(--transition);
-            box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                       inset -4px -4px 8px var(--shadow-light);
-        }
-
-        #colorPicker:hover {
-            transform: translateY(-2px);
-        }
-
-        #colorPicker::-webkit-color-swatch-wrapper {
-            padding: 4px;
-            border-radius: 12px;
-        }
-
-        #colorPicker::-webkit-color-swatch {
-            border: none;
-            border-radius: 8px;
-        }
-
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .slider-value {
-            font-size: 0.85rem;
-            font-weight: 500;
-            padding: 0.35rem 0.85rem;
-            background: var(--surface);
-            color: var(--primary-dark);
-            border-radius: 8px;
-            box-shadow: inset 2px 2px 4px var(--shadow-dark),
-                       inset -2px -2px 4px var(--shadow-light);
-        }
-
-        .slider {
-            width: 100%;
-            height: 12px;
-            border-radius: 6px;
-            -webkit-appearance: none;
-            background: var(--surface);
-            margin: 1rem 0;
-            box-shadow: inset 3px 3px 6px var(--shadow-dark),
-                       inset -3px -3px 6px var(--shadow-light);
-            border: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--surface);
-            cursor: pointer;
-            border: none;
-            box-shadow: 4px 4px 8px var(--shadow-dark),
-                       -4px -4px 8px var(--shadow-light);
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                       -6px -6px 12px var(--shadow-light);
-        }
-
-        .slider::-webkit-slider-thumb:active {
-            box-shadow: inset 2px 2px 4px var(--shadow-dark),
-                       inset -2px -2px 4px var(--shadow-light);
-        }
-
-        button {
-            width: 100%;
-            padding: 0.875rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text);
-            background: var(--surface);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                       -6px -6px 12px var(--shadow-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        button:hover {
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                       inset -4px -4px 8px var(--shadow-light);
-        }
-
-        #setWarmWhite, #setColdWhite, #syncButton {
-            color: var(--primary);
-        }
-
-        #setWarmWhite:hover, #setColdWhite:hover, #syncButton:hover {
-            color: var(--primary-dark);
-        }
-
-        #syncButton {
-            margin-top: 1rem;
-        }
-
-        .footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-light);
-            padding-top: 1rem;
-            border-top: 1px solid var(--surface-dark);
-        }
-
-        @media (max-width: 768px) and (orientation: portrait) {
-            :root {
-                font-size: 14px;
-            }
-
-            body {
-                padding: 0.5rem;
-                min-height: 100dvh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-            }
-            
-            .container {
-                padding: 1rem;
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
-                height: calc(100dvh - 1rem);
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                box-sizing: border-box;
-            }
-
-            .header {
-                margin-bottom: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .subtitle {
-                font-size: 0.85rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .grid-layout {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-                flex: 1;
-                overflow-y: auto;
-                padding-right: 0.5rem;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .left-panel, .right-panel {
-                gap: 0.75rem;
-            }
-
-            .section {
-                padding: 1rem;
-            }
-
-            .status-bar {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .power-controls {
-                padding: 0.75rem;
-                gap: 0.75rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .power-button {
-                padding: 0.75rem;
-                font-size: 0.9rem;
-            }
-
-            .helper-text {
-                font-size: 0.75rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .slider {
-                margin: 0.5rem 0;
-            }
-
-            .footer {
-                margin-top: 0.75rem;
-                font-size: 0.75rem;
-                padding-top: 0.75rem;
-            }
-
-            button {
-                padding: 0.6rem;
-            }
-
-            .status-indicator {
-                padding: 0.5rem 1rem;
-                font-size: 0.8rem;
-            }
-
-            #colorPicker {
-                height: 40px;
-            }
-
-            .section-header {
-                padding-bottom: 0.35rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .color-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) and (orientation: landscape) {
-            body {
-                padding: 0.5rem;
-                height: auto;
-                min-height: 100dvh;
-            }
-
-            .container {
-                padding: 1rem;
-                height: auto;
-                min-height: calc(100dvh - 1rem);
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
-            }
-
-            .grid-layout {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .power-controls {
-                padding: 0.75rem;
-                gap: 1rem;
-            }
-
-            .status-bar {
-                flex-wrap: nowrap;
-                margin: 1rem 0;
-            }
-
-            h1 {
-                font-size: 1.25rem;
-            }
-
-            .subtitle {
-                font-size: 0.8rem;
-            }
-
-            .section {
-                padding: 0.75rem;
-            }
-
-            .helper-text {
-                font-size: 0.7rem;
-            }
-
-            #colorPicker {
-                height: 35px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 0.25rem;
-            }
-
-            .container {
-                padding: 0.75rem;
-                border-radius: 16px;
-            }
-
-            .power-controls {
-                padding: 0.5rem;
-                gap: 0.5rem;
-            }
-
-            .power-button {
-                padding: 0.6rem;
-                font-size: 0.8rem;
-            }
-
-            .status-bar {
-                gap: 0.35rem;
-            }
-
-            .status-indicator {
-                padding: 0.4rem 0.8rem;
-            }
-
-            .section {
-                padding: 0.75rem;
-            }
-
-            button {
-                padding: 0.5rem;
-                font-size: 0.8rem;
-            }
-        }
-
-        /* New styles for mood colors */
-        .mood-colors {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            padding: 1rem;
-        }
-
-        .color-category {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-        }
-
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 80px);
-            gap: 1.5rem;
-            justify-content: center;
-            padding: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .color-grid {
-                grid-template-columns: repeat(2, 80px);
-            }
-        }
-
-        .color-btn {
-            width: 80px;
-            height: 80px;
-            padding: 0;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--surface);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .color-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-        }
-
-        .color-btn:active {
-            transform: translateY(0);
-        }
-
-        .color-indicator {
-            width: 100%;
-            height: 100%;
-            border-radius: 16px;
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .color-btn[data-color="173,216,230"] { box-shadow: 6px 6px 12px rgba(173, 216, 230, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="0,255,255"] { box-shadow: 6px 6px 12px rgba(0, 255, 255, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="230,230,250"] { box-shadow: 6px 6px 12px rgba(230, 230, 250, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="152,251,152"] { box-shadow: 6px 6px 12px rgba(152, 251, 152, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="255,0,127"] { box-shadow: 6px 6px 12px rgba(255, 0, 127, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="255,105,180"] { box-shadow: 6px 6px 12px rgba(255, 105, 180, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="128,0,128"] { box-shadow: 6px 6px 12px rgba(128, 0, 128, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="247,231,206"] { box-shadow: 6px 6px 12px rgba(247, 231, 206, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="57,255,20"] { box-shadow: 6px 6px 12px rgba(57, 255, 20, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="125,249,255"] { box-shadow: 6px 6px 12px rgba(125, 249, 255, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="255,165,0"] { box-shadow: 6px 6px 12px rgba(255, 165, 0, 0.3), -6px -6px 12px var(--shadow-light); }
-        .color-btn[data-color="255,20,147"] { box-shadow: 6px 6px 12px rgba(255, 20, 147, 0.3), -6px -6px 12px var(--shadow-light); }
-
-        .color-btn:hover[data-color="173,216,230"] { box-shadow: 8px 8px 16px rgba(173, 216, 230, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="0,255,255"] { box-shadow: 8px 8px 16px rgba(0, 255, 255, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="230,230,250"] { box-shadow: 8px 8px 16px rgba(230, 230, 250, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="152,251,152"] { box-shadow: 8px 8px 16px rgba(152, 251, 152, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="255,0,127"] { box-shadow: 8px 8px 16px rgba(255, 0, 127, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="255,105,180"] { box-shadow: 8px 8px 16px rgba(255, 105, 180, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="128,0,128"] { box-shadow: 8px 8px 16px rgba(128, 0, 128, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="247,231,206"] { box-shadow: 8px 8px 16px rgba(247, 231, 206, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="57,255,20"] { box-shadow: 8px 8px 16px rgba(57, 255, 20, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="125,249,255"] { box-shadow: 8px 8px 16px rgba(125, 249, 255, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="255,165,0"] { box-shadow: 8px 8px 16px rgba(255, 165, 0, 0.4), -8px -8px 16px var(--shadow-light); }
-        .color-btn:hover[data-color="255,20,147"] { box-shadow: 8px 8px 16px rgba(255, 20, 147, 0.4), -8px -8px 16px var(--shadow-light); }
-
-        .color-btn:active[data-color="173,216,230"] { box-shadow: inset 4px 4px 8px rgba(173, 216, 230, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="0,255,255"] { box-shadow: inset 4px 4px 8px rgba(0, 255, 255, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="230,230,250"] { box-shadow: inset 4px 4px 8px rgba(230, 230, 250, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="152,251,152"] { box-shadow: inset 4px 4px 8px rgba(152, 251, 152, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="255,0,127"] { box-shadow: inset 4px 4px 8px rgba(255, 0, 127, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="255,105,180"] { box-shadow: inset 4px 4px 8px rgba(255, 105, 180, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="128,0,128"] { box-shadow: inset 4px 4px 8px rgba(128, 0, 128, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="247,231,206"] { box-shadow: inset 4px 4px 8px rgba(247, 231, 206, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="57,255,20"] { box-shadow: inset 4px 4px 8px rgba(57, 255, 20, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="125,249,255"] { box-shadow: inset 4px 4px 8px rgba(125, 249, 255, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="255,165,0"] { box-shadow: inset 4px 4px 8px rgba(255, 165, 0, 0.2), inset -4px -4px 8px var(--shadow-light); }
-        .color-btn:active[data-color="255,20,147"] { box-shadow: inset 4px 4px 8px rgba(255, 20, 147, 0.2), inset -4px -4px 8px var(--shadow-light); }
-
-        /* Color-specific shadows for indicators */
-        [style*="background-color: #ADD8E6"]::after { box-shadow: 4px 4px 8px rgba(173, 216, 230, 0.5); }
-        [style*="background-color: #00FFFF"]::after { box-shadow: 4px 4px 8px rgba(0, 255, 255, 0.5); }
-        [style*="background-color: #E6E6FA"]::after { box-shadow: 4px 4px 8px rgba(230, 230, 250, 0.5); }
-        [style*="background-color: #98FB98"]::after { box-shadow: 4px 4px 8px rgba(152, 251, 152, 0.5); }
-        [style*="background-color: #FF007F"]::after { box-shadow: 4px 4px 8px rgba(255, 0, 127, 0.5); }
-        [style*="background-color: #FF69B4"]::after { box-shadow: 4px 4px 8px rgba(255, 105, 180, 0.5); }
-        [style*="background-color: #800080"]::after { box-shadow: 4px 4px 8px rgba(128, 0, 128, 0.5); }
-        [style*="background-color: #F7E7CE"]::after { box-shadow: 4px 4px 8px rgba(247, 231, 206, 0.5); }
-        [style*="background-color: #39FF14"]::after { box-shadow: 4px 4px 8px rgba(57, 255, 20, 0.5); }
-        [style*="background-color: #7DF9FF"]::after { box-shadow: 4px 4px 8px rgba(125, 249, 255, 0.5); }
-        [style*="background-color: #FFA500"]::after { box-shadow: 4px 4px 8px rgba(255, 165, 0, 0.5); }
-        [style*="background-color: #FF1493"]::after { box-shadow: 4px 4px 8px rgba(255, 20, 147, 0.5); }
-
-        /* Media queries remain unchanged */
-    </style>
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/mood-colors.css">
+    <link rel="stylesheet" href="css/layout.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Smart Light Control</h1>
-            <div class="subtitle">Control your smart lights with precision and ease</div>
+            <div class="header__subtitle">Control your smart lights with precision and ease</div>
         </div>
 
-        <div class="power-controls">
-            <button id="turnOn" class="power-button">
-                <span class="icon">☀️</span>
-                Turn On
-            </button>
-            <button id="turnOff" class="power-button">
-                <span class="icon">🌙</span>
-                Turn Off
-            </button>
-        </div>
-
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span class="status-text">System Online</span>
+        <!-- Power Controls -->
+        <div class="section">
+            <div class="section__header">
+                <div class="section__label">Power Control</div>
             </div>
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span class="status-text">Lights Connected</span>
+            <div class="power-controls">
+                <button id="turnOn" class="button button--primary">
+                    <span class="button__icon">☀️</span>
+                    Turn On
+                </button>
+                <button id="turnOff" class="button">
+                    <span class="button__icon">🌙</span>
+                    Turn Off
+                </button>
             </div>
         </div>
 
-        <div class="grid-layout">
-            <div class="left-panel">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="control-label">Color Selection</div>
-                    </div>
-                    <div class="helper-text">Choose any color from the spectrum to set your perfect ambiance</div>
-                    <div class="color-control">
-                        <input type="color" id="colorPicker" value="#ffffff">
-                    </div>
-                </div>
-                <div class="section">
-                    <div class="section-header">
-                        <div class="control-label">Mood Colors</div>
-                    </div>
-                    <div class="helper-text">Choose from predefined mood-based colors</div>
-                    <div class="mood-colors">
-                        <div class="color-category">
-                            <h3>Relaxing & Calming</h3>
-                            <div class="color-grid">
-                                <button class="color-btn" data-color="173,216,230" title="Soft Blue">
-                                    <div class="color-indicator" style="background-color: #ADD8E6"></div>
-                                </button>
-                                <button class="color-btn" data-color="0,255,255" title="Aqua">
-                                    <div class="color-indicator" style="background-color: #00FFFF"></div>
-                                </button>
-                                <button class="color-btn" data-color="230,230,250" title="Lavender">
-                                    <div class="color-indicator" style="background-color: #E6E6FA"></div>
-                                </button>
-                                <button class="color-btn" data-color="152,251,152" title="Mint Green">
-                                    <div class="color-indicator" style="background-color: #98FB98"></div>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="color-category">
-                            <h3>Romantic & Warm</h3>
-                            <div class="color-grid">
-                                <button class="color-btn" data-color="255,0,127" title="Rose Red">
-                                    <div class="color-indicator" style="background-color: #FF007F"></div>
-                                </button>
-                                <button class="color-btn" data-color="255,105,180" title="Warm Pink">
-                                    <div class="color-indicator" style="background-color: #FF69B4"></div>
-                                </button>
-                                <button class="color-btn" data-color="128,0,128" title="Deep Purple">
-                                    <div class="color-indicator" style="background-color: #800080"></div>
-                                </button>
-                                <button class="color-btn" data-color="247,231,206" title="Champagne">
-                                    <div class="color-indicator" style="background-color: #F7E7CE"></div>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="color-category">
-                            <h3>Energetic & Vibrant</h3>
-                            <div class="color-grid">
-                                <button class="color-btn" data-color="57,255,20" title="Neon Green">
-                                    <div class="color-indicator" style="background-color: #39FF14"></div>
-                                </button>
-                                <button class="color-btn" data-color="125,249,255" title="Electric Blue">
-                                    <div class="color-indicator" style="background-color: #7DF9FF"></div>
-                                </button>
-                                <button class="color-btn" data-color="255,165,0" title="Bright Orange">
-                                    <div class="color-indicator" style="background-color: #FFA500"></div>
-                                </button>
-                                <button class="color-btn" data-color="255,20,147" title="Hot Pink">
-                                    <div class="color-indicator" style="background-color: #FF1493"></div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="section">
-                    <div class="section-header">
-                        <div class="control-label">White Light Control</div>
-                    </div>
-                    <div class="helper-text">Adjust the intensity of warm or cold white light</div>
-                    <div class="slider-container">
-                        <div class="slider-header">
-                            <span>Intensity</span>
-                            <span class="slider-value" id="whiteValue">100%</span>
-                        </div>
-                        <input type="range" class="slider" id="whiteSlider" min="0" max="255" value="255">
-                        <div style="display: flex; gap: 1rem;">
-                            <button id="setWarmWhite" style="flex: 1;">
-                                <span class="icon">🌅</span>
-                                Warm
-                            </button>
-                            <button id="setColdWhite" style="flex: 1;">
-                                <span class="icon">❄️</span>
-                                Cold
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <!-- White Light Control -->
+        <div class="section">
+            <div class="section__header">
+                <div class="section__label">White Light Control</div>
             </div>
-            <div class="right-panel">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="control-label">System Controls</div>
-                    </div>
-                    <div class="helper-text">Sync and update system status</div>
-                    <button id="syncButton">
-                        <span class="icon">🔄</span>
-                        Sync Status
+            <div class="section__helper-text">Adjust the intensity of warm or cold white light</div>
+            <div class="slider-container">
+                <div class="slider-header">
+                    <span>Intensity</span>
+                    <span class="slider-value" id="whiteValue">100%</span>
+                </div>
+                <input type="range" class="slider" id="whiteSlider" min="0" max="255" value="255">
+                <div class="white-light-controls">
+                    <button id="setWarmWhite" class="button button--primary">
+                        <span class="button__icon">🌅</span>
+                        Warm
+                    </button>
+                    <button id="setColdWhite" class="button button--primary">
+                        <span class="button__icon">❄️</span>
+                        Cold
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- Color Selection -->
+        <div class="section">
+            <div class="section__header">
+                <div class="section__label">Color Selection</div>
+            </div>
+            <div class="section__helper-text">Choose any color from the spectrum to set your perfect ambiance</div>
+            <div class="color-control">
+                <input type="color" id="colorPicker" class="color-picker" value="#ffffff">
+            </div>
+        </div>
+
+        <!-- Mood Colors -->
+        <div class="section">
+            <div class="section__header">
+                <div class="section__label">Mood Colors</div>
+            </div>
+            <div class="section__helper-text">Choose from predefined mood-based colors</div>
+            <div class="mood-colors">
+                <div class="color-category">
+                    <h3>Relaxing & Calming</h3>
+                    <div class="color-grid">
+                        <button class="color-btn" data-color="173,216,230" title="Soft Blue">
+                            <div class="color-indicator" style="background-color: #ADD8E6"></div>
+                        </button>
+                        <button class="color-btn" data-color="0,255,255" title="Aqua">
+                            <div class="color-indicator" style="background-color: #00FFFF"></div>
+                        </button>
+                        <button class="color-btn" data-color="230,230,250" title="Lavender">
+                            <div class="color-indicator" style="background-color: #E6E6FA"></div>
+                        </button>
+                        <button class="color-btn" data-color="152,251,152" title="Mint Green">
+                            <div class="color-indicator" style="background-color: #98FB98"></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="color-category">
+                    <h3>Romantic & Warm</h3>
+                    <div class="color-grid">
+                        <button class="color-btn" data-color="255,0,127" title="Rose Red">
+                            <div class="color-indicator" style="background-color: #FF007F"></div>
+                        </button>
+                        <button class="color-btn" data-color="255,105,180" title="Warm Pink">
+                            <div class="color-indicator" style="background-color: #FF69B4"></div>
+                        </button>
+                        <button class="color-btn" data-color="128,0,128" title="Deep Purple">
+                            <div class="color-indicator" style="background-color: #800080"></div>
+                        </button>
+                        <button class="color-btn" data-color="247,231,206" title="Champagne">
+                            <div class="color-indicator" style="background-color: #F7E7CE"></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="color-category">
+                    <h3>Energetic & Vibrant</h3>
+                    <div class="color-grid">
+                        <button class="color-btn" data-color="57,255,20" title="Neon Green">
+                            <div class="color-indicator" style="background-color: #39FF14"></div>
+                        </button>
+                        <button class="color-btn" data-color="125,249,255" title="Electric Blue">
+                            <div class="color-indicator" style="background-color: #7DF9FF"></div>
+                        </button>
+                        <button class="color-btn" data-color="255,165,0" title="Bright Orange">
+                            <div class="color-indicator" style="background-color: #FFA500"></div>
+                        </button>
+                        <button class="color-btn" data-color="255,20,147" title="Hot Pink">
+                            <div class="color-indicator" style="background-color: #FF1493"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Controls -->
+        <div class="section">
+            <div class="section__header">
+                <div class="section__label">System Controls</div>
+            </div>
+            <div class="section__helper-text">Sync and update system status</div>
+            <button id="syncButton" class="button button--primary">
+                <span class="button__icon">🔄</span>
+                Sync Status
+            </button>
+            <div class="bulb-count">
+                <span class="bulb-count__number">0</span>
+                <span class="bulb-count__label">Connected Bulbs</span>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-indicator__dot"></div>
+                <span class="status-indicator__text">System Online</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-indicator__dot"></div>
+                <span class="status-indicator__text">Lights Connected</span>
+            </div>
+        </div>
+
         <div class="footer">
             Smart Light Control System v1.0 | Last synced: <span id="lastSync">Never</span>
         </div>
     </div>
 
-    <script>
-        const turnOnButton = document.getElementById('turnOn');
-        const turnOffButton = document.getElementById('turnOff');
-        const setWarmWhiteButton = document.getElementById('setWarmWhite');
-        const setColdWhiteButton = document.getElementById('setColdWhite');
-        const syncButton = document.getElementById('syncButton');
-        const colorPicker = document.getElementById('colorPicker');
-        const whiteSlider = document.getElementById('whiteSlider');
-        const whiteValue = document.getElementById('whiteValue');
-        const lastSync = document.getElementById('lastSync');
-        const statusDots = document.querySelectorAll('.status-dot');
-        const colorButtons = document.querySelectorAll('.color-btn');
-        let isOn = false;
-
-        function updateSliderValue() {
-            whiteValue.textContent = Math.round((whiteSlider.value / 255) * 100) + '%';
-        }
-
-        whiteSlider.addEventListener('input', updateSliderValue);
-
-        function toggleLights(action, color) {
-            let url = `http://192.168.18.4:3000/api/lights?action=${action}`;
-            if (color) {
-                url += `&color=${color}`;
-            }
-            
-            fetch(url, {
-                method: 'GET'
-            })
-            .then(response => {
-                if (response.ok) {
-                    isOn = action === 'on' || action === 'color';
-                    updateButtonStyles();
-                    updateStatusDots();
-                }
-            })
-            .catch(error => {
-                console.error('Error toggling lights:', error);
-                updateStatusDots(false);
-            });
-        }
-
-        function updateButtonStyles() {
-            turnOnButton.classList.toggle('active', isOn);
-            turnOffButton.classList.toggle('active', !isOn);
-        }
-
-        function updateStatusDots(online = true) {
-            statusDots.forEach(dot => {
-                dot.classList.toggle('offline', !online);
-            });
-        }
-
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? 
-                `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : 
-                null;
-        }
-
-        function updateLastSync() {
-            const now = new Date();
-            lastSync.textContent = now.toLocaleTimeString();
-        }
-
-        function syncStatus() {
-            fetch('http://192.168.18.4:3000/api/lights', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                isOn = data.isOn;
-                if (data.color) {
-                    const colorHex = `#${data.color.toString(16).padStart(6, '0')}`;
-                    colorPicker.value = colorHex;
-                    updateThemeColors(colorHex);
-                }
-                if (data.warmWhite !== undefined || data.coldWhite !== undefined) {
-                    whiteSlider.value = data.warmWhite || data.coldWhite;
-                }
-                updateButtonStyles();
-                updateSliderValue();
-                updateStatusDots(true);
-                updateLastSync();
-                console.log('Status synced:', data);
-            })
-            .catch(error => {
-                console.error('Error syncing status:', error);
-                updateStatusDots(false);
-            });
-        }
-
-        function updateThemeColors(color) {
-            const root = document.documentElement;
-            root.style.setProperty('--primary', color);
-            
-            const hex = color.replace('#', '');
-            const r = parseInt(hex.substr(0, 2), 16);
-            const g = parseInt(hex.substr(2, 2), 16);
-            const b = parseInt(hex.substr(4, 2), 16);
-            
-            const darkR = Math.round(r * 0.8);
-            const darkG = Math.round(g * 0.8);
-            const darkB = Math.round(b * 0.8);
-            root.style.setProperty('--primary-dark', `rgb(${darkR}, ${darkG}, ${darkB})`);
-            
-            const lightR = Math.round(r + (255 - r) * 0.3);
-            const lightG = Math.round(g + (255 - g) * 0.3);
-            const lightB = Math.round(b + (255 - b) * 0.3);
-            root.style.setProperty('--primary-light', `rgb(${lightR}, ${lightG}, ${lightB})`);
-        }
-
-        // Event Listeners
-        turnOnButton.addEventListener('click', () => toggleLights('on'));
-        turnOffButton.addEventListener('click', () => toggleLights('off'));
-
-        setWarmWhiteButton.addEventListener('click', () => {
-            const intensity = whiteSlider.value;
-            const url = `http://192.168.18.4:3000/api/lights?action=warm_white&intensity=${intensity}`;
-            fetch(url, {
-                method: 'GET'
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log(`Warm white set with intensity ${intensity}`);
-                    updateStatusDots(true);
-                }
-            })
-            .catch(error => {
-                console.error('Error setting warm white:', error);
-                updateStatusDots(false);
-            });
-        });
-
-        setColdWhiteButton.addEventListener('click', () => {
-            const intensity = whiteSlider.value;
-            const url = `http://192.168.18.4:3000/api/lights?action=cold_white&intensity=${intensity}`;
-            fetch(url, {
-                method: 'GET'
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log(`Cold white set with intensity ${intensity}`);
-                    updateStatusDots(true);
-                }
-            })
-            .catch(error => {
-                console.error('Error setting cold white:', error);
-                updateStatusDots(false);
-            });
-        });
-
-        syncButton.addEventListener('click', syncStatus);
-
-        // Color picker event listener
-        colorPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            updateThemeColors(color);
-            const rgbColor = hexToRgb(color);
-            if (rgbColor) {
-                toggleLights('color', rgbColor);
-            }
-        });
-
-        // Add event listeners for mood color buttons
-        colorButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const color = button.dataset.color;
-                if (color) {
-                    toggleLights('color', color);
-                    // Convert RGB to HEX for the color picker and theme
-                    const [r, g, b] = color.split(',').map(Number);
-                    const hex = '#' + [r, g, b].map(x => {
-                        const hex = x.toString(16);
-                        return hex.length === 1 ? '0' + hex : hex;
-                    }).join('');
-                    colorPicker.value = hex;
-                    updateThemeColors(hex);
-                }
-            });
-        });
-
-        // Initial setup
-        updateSliderValue();
-        syncStatus();
-    </script>
+    <!-- JavaScript modules -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
