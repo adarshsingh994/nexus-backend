@@ -12,6 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def set_light_color(ip, color):
+    light = None
     try:
         logger.info(f"Attempting to set color for light at IP: {ip} with RGB: {color}")
         light = wizlight(ip)
@@ -30,6 +31,12 @@ async def set_light_color(ip, color):
             "ip": ip,
             "message": error_message
         }
+    finally:
+        if light is not None:
+            try:
+                await light.async_close()
+            except Exception as e:
+                logger.error(f"Error closing connection to light at IP {ip}: {str(e)}")
 
 async def set_lights_color(ips, color):
     logger.info(f"Starting to set color for {len(ips)} lights with RGB: {color}")
@@ -45,6 +52,7 @@ async def set_lights_color(ips, color):
     }
 
 async def main():
+    loop = None
     try:
         logger.info("Parsing input parameters")
         data = json.loads(sys.argv[1])
@@ -87,4 +95,12 @@ async def main():
 if __name__ == '__main__':
     if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        print(json.dumps({
+            "overall_success": False,
+            "message": f"Fatal error: {str(e)}",
+            "results": []
+        }))

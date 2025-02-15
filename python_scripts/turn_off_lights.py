@@ -12,6 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def turn_off_light(ip):
+    light = None
     try:
         logger.info(f"Attempting to turn off light at IP: {ip}")
         light = wizlight(ip)
@@ -30,6 +31,12 @@ async def turn_off_light(ip):
             "ip": ip,
             "message": error_message
         }
+    finally:
+        if light is not None:
+            try:
+                await light.async_close()
+            except Exception as e:
+                logger.error(f"Error closing connection to light at IP {ip}: {str(e)}")
 
 async def turn_off_lights(ips):
     logger.info(f"Starting to turn off {len(ips)} lights")
@@ -45,27 +52,44 @@ async def turn_off_lights(ips):
     }
 
 async def main():
-    args = sys.argv[1:]
-    logger.info(f"Received request to turn off lights: {args}")
-    
-    if not args:
-        logger.warning("No IP addresses provided")
-        response = {
+    loop = None
+    try:
+        args = sys.argv[1:]
+        logger.info(f"Received request to turn off lights: {args}")
+        
+        if not args:
+            logger.warning("No IP addresses provided")
+            response = {
+                "overall_success": False,
+                "message": "No IP addresses provided",
+                "results": []
+            }
+        else:
+            result = await turn_off_lights(args)
+            response = {
+                "overall_success": result["overall_success"],
+                "results": result["results"]
+            }
+        
+        print(json.dumps(response))
+        logger.info("Response sent")
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        print(json.dumps({
             "overall_success": False,
-            "message": "No IP addresses provided",
+            "message": f"Unexpected error: {str(e)}",
             "results": []
-        }
-    else:
-        result = await turn_off_lights(args)
-        response = {
-            "overall_success": result["overall_success"],
-            "results": result["results"]
-        }
-    
-    print(json.dumps(response))
-    logger.info("Response sent")
+        }))
 
 if __name__ == '__main__':
     if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        logger.error(f"Fatal error: {str(e)}")
+        print(json.dumps({
+            "overall_success": False,
+            "message": f"Fatal error: {str(e)}",
+            "results": []
+        }))
