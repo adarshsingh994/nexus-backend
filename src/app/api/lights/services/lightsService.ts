@@ -1,133 +1,216 @@
-import { ChildProcess, spawn } from 'child_process'
-
-let bulbs: string[] = []
-let pythonProcesses: ChildProcess[] = []
+import { ProcessPool } from './processPool';
+import { config } from '../config/systemConfig';
+import {
+  LightControlError,
+  InvalidInputError,
+  InvalidResponseError,
+  SystemError,
+  ErrorCode
+} from '../errors/lightControlErrors';
 
 interface LightResponse {
-  message: string
-  overall_success?: boolean
-  success?: boolean
-  results?: Record<string, { success: boolean; message: string }>
-  count?: number
-  bulbs?: string[]
+  message: string;
+  overall_success?: boolean;
+  success?: boolean;
+  results?: Record<string, { success: boolean; message: string }>;
+  count?: number;
+  bulbs?: string[];
 }
 
 export class LightsService {
-  private static instance: LightsService
+  private static instance: LightsService;
+  private bulbs: string[] = [];
+  private processPool: ProcessPool;
   
-  private constructor() {}
+  private constructor() {
+    this.processPool = ProcessPool.getInstance();
+  }
 
   static getInstance(): LightsService {
     if (!LightsService.instance) {
-      LightsService.instance = new LightsService()
+      LightsService.instance = new LightsService();
     }
-    return LightsService.instance
+    return LightsService.instance;
   }
 
   getBulbs(): string[] {
-    return bulbs
+    return this.bulbs;
   }
 
-  setBulbs(newBulbs: string[]): void {
-    bulbs = newBulbs
+  private setBulbs(newBulbs: string[]): void {
+    this.bulbs = newBulbs;
+  }
+
+  private validateIntensity(intensity: number): void {
+    if (typeof intensity !== 'number' || intensity < 0 || intensity > 100) {
+      throw new InvalidInputError('Intensity must be a number between 0 and 100');
+    }
+  }
+
+  private validateColor(color: number[]): void {
+    if (!Array.isArray(color) || color.length !== 3) {
+      throw new InvalidInputError('Color must be an array of 3 RGB values');
+    }
+    
+    for (const value of color) {
+      if (typeof value !== 'number' || value < 0 || value > 255) {
+        throw new InvalidInputError('RGB values must be numbers between 0 and 255');
+      }
+    }
+  }
+
+  private async executeWithTimeout<T>(
+    operation: () => Promise<T>,
+    timeout: number = config.lights.control.timeout
+  ): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new LightControlError('Operation timed out', ErrorCode.PROCESS_TIMEOUT, true));
+      }, timeout);
+    });
+
+    return Promise.race([operation(), timeoutPromise]);
+  }
+
+  private parseResponse(response: string): LightResponse {
+    try {
+      return JSON.parse(response);
+    } catch (error) {
+      console.error('Failed to parse light control response:', error);
+      throw new InvalidResponseError('Failed to parse response from light control script');
+    }
   }
 
   async turnOnLights(): Promise<LightResponse> {
-    const response = await this.callPythonFile('turn_on_lights', bulbs)
-    return JSON.parse(response)
-  }
-
-  async turnOffLights(): Promise<LightResponse> {
-    const response = await this.callPythonFile('turn_off_lights', bulbs)
-    return JSON.parse(response)
-  }
-
-  async setWarmWhite(intensity: number): Promise<LightResponse> {
-    const request = {
-      ips: bulbs,
-      intensity
-    }
-    const response = await this.callPythonFile('set_lights_warm_white', [JSON.stringify(request)])
-    return JSON.parse(response)
-  }
-
-  async setColdWhite(intensity: number): Promise<LightResponse> {
-    const request = {
-      ips: bulbs,
-      intensity
-    }
-    const response = await this.callPythonFile('set_lights_cold_white', [JSON.stringify(request)])
-    return JSON.parse(response)
-  }
-
-  async setColor(color: number[]): Promise<LightResponse> {
-    const request = {
-      ips: bulbs,
-      color
-    }
-    const response = await this.callPythonFile('set_lights_color', [JSON.stringify(request)])
-    return JSON.parse(response)
-  }
-
-  async discoverLights(): Promise<LightResponse> {
-    const response = await this.callPythonFile('get_lights')
-    const data = JSON.parse(response)
-    if (data.success) {
-      this.setBulbs(data.bulbs)
-    }
-    return data
-  }
-
-  private callPythonFile(name: string, args: string[] = []): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const venvPythonPath = 'python_scripts/.venv/Scripts/python.exe'; // Windows
-      // const venvPythonPath = 'python_scripts/.venv/bin/python'; // macOS/Linux
-  
-      const scriptPath = `python_scripts/${name}.py`;
-      const scriptArgs = [scriptPath, ...args.map(arg => String(arg))];
-  
-      console.log(`Executing: ${venvPythonPath} ${scriptArgs.join(' ')}`);
-  
-      const pythonProcess = spawn(venvPythonPath, scriptArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
-      
-      pythonProcesses.push(pythonProcess);
-  
-      let output = "";
-      let error = "";
-  
-      pythonProcess.stdout.on("data", (data) => {
-        output += data.toString();
-      });
-  
-      pythonProcess.stderr.on("data", (data) => {
-        error += data.toString();
-      });
-  
-      pythonProcess.on("close", (code) => {
-        pythonProcesses = pythonProcesses.filter(p => p !== pythonProcess);
-        if (code === 0) {
-          resolve(output.trim());
-        } else {
-          reject(new Error(`Python script exited with code ${code}: ${error.trim()}`));
+    return this.executeWithTimeout(async () => {
+      try {
+        const response = await this.processPool.executeScript('turn_on_lights', this.bulbs);
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
         }
-      });
+        throw new SystemError('Failed to turn on lights');
+      }
     });
   }
 
+  async turnOffLights(): Promise<LightResponse> {
+    return this.executeWithTimeout(async () => {
+      try {
+        const response = await this.processPool.executeScript('turn_off_lights', this.bulbs);
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to turn off lights');
+      }
+    });
+  }
+
+  async setWarmWhite(intensity: number): Promise<LightResponse> {
+    this.validateIntensity(intensity);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: this.bulbs,
+          intensity
+        };
+        const response = await this.processPool.executeScript(
+          'set_lights_warm_white',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set warm white');
+      }
+    });
+  }
+
+  async setColdWhite(intensity: number): Promise<LightResponse> {
+    this.validateIntensity(intensity);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: this.bulbs,
+          intensity
+        };
+        const response = await this.processPool.executeScript(
+          'set_lights_cold_white',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set cold white');
+      }
+    });
+  }
+
+  async setColor(color: number[]): Promise<LightResponse> {
+    this.validateColor(color);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: this.bulbs,
+          color
+        };
+        const response = await this.processPool.executeScript(
+          'set_lights_color',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set color');
+      }
+    });
+  }
+
+  async discoverLights(): Promise<LightResponse> {
+    return this.executeWithTimeout(
+      async () => {
+        try {
+          const response = await this.processPool.executeScript('get_lights');
+          const data = this.parseResponse(response);
+          if (data.success && data.bulbs) {
+            this.setBulbs(data.bulbs);
+          }
+          return data;
+        } catch (error) {
+          if (error instanceof LightControlError) {
+            throw error;
+          }
+          throw new SystemError('Failed to discover lights');
+        }
+      },
+      config.lights.discovery.timeout
+    );
+  }
+
   cleanup(): void {
-    pythonProcesses.forEach(p => p.kill())
+    this.processPool.cleanup();
   }
 }
 
 // Handle cleanup on process termination
-process.on("SIGINT", () => {
-  console.log("Server shutting down, terminating Python processes...");
+process.on('SIGINT', () => {
+  console.log('Cleaning up LightsService...');
   LightsService.getInstance().cleanup();
-  process.exit();
 });
 
-process.on("SIGTERM", () => {
-  console.log("Server shutting down, terminating Python processes...");
+process.on('SIGTERM', () => {
+  console.log('Cleaning up LightsService...');
   LightsService.getInstance().cleanup();
-  process.exit();
 });
