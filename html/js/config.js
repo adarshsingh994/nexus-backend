@@ -3,7 +3,8 @@ export const API_BASE_URL = 'http://192.168.18.4:3000/api';
 
 // API Endpoints
 export const ENDPOINTS = {
-    LIGHTS: '/lights'
+    LIGHTS: '/lights',
+    SYNC: '/lights/sync'
 };
 
 // API Actions

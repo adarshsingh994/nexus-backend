@@ -7,12 +7,19 @@ export function initializeStatusIndicators(config) {
     const { apiBaseUrl, elements } = config;
     const { statusDots, lastSync } = elements;
 
-    // Initialize sync button and bulb count
-    const syncButton = document.getElementById('syncButton');
-    const bulbCount = document.querySelector('.bulb-count');
-    const bulbCountNumber = document.querySelector('.bulb-count__number');
+    // Initialize buttons and UI elements
+        const getLightsButton = document.getElementById('getLightsButton');
+        const syncButton = document.getElementById('syncButton');
+        const bulbCount = document.querySelector('.bulb-count');
+        const bulbCountNumber = document.querySelector('.bulb-count__number');
+        
+        getLightsButton.addEventListener('click', handleGetLights);
+        syncButton.addEventListener('click', handleSync);
     
-    syncButton.addEventListener('click', handleSync);
+        // Create toast container
+        const toastContainer = document.createElement('div');
+        toastContainer.classList.add('toast');
+        document.body.appendChild(toastContainer);
 
     function updateStatusDots(online = true) {
         statusDots.forEach(dot => {
@@ -25,9 +32,19 @@ export function initializeStatusIndicators(config) {
         lastSync.textContent = now.toLocaleTimeString();
     }
 
+    function showToast(message, type = 'success') {
+        toastContainer.textContent = message;
+        toastContainer.className = `toast toast--${type} toast--visible`;
+        
+        setTimeout(() => {
+            toastContainer.classList.remove('toast--visible');
+        }, 3000);
+    }
+
     function setSyncingState(isSyncing) {
-        syncButton.classList.toggle('button--syncing', isSyncing);
+        getLightsButton.disabled = isSyncing;
         syncButton.disabled = isSyncing;
+        syncButton.classList.toggle('button--syncing', isSyncing);
     }
 
     function updateBulbCount(count) {
@@ -35,31 +52,61 @@ export function initializeStatusIndicators(config) {
         bulbCount.classList.add('bulb-count--visible');
     }
 
-    async function handleSync() {
+    async function handleGetLights() {
         setSyncingState(true);
         
         try {
-            // Call the default endpoint without any action to get all lights
             const response = await fetch(`${apiBaseUrl}${ENDPOINTS.LIGHTS}`);
             const data = await response.json();
 
             if (data.success) {
-                // Update bulb count
                 if (data.data && typeof data.data.count === 'number') {
                     updateBulbCount(data.data.count);
                 }
-
-                // Update status
                 updateStatusDots(true);
                 updateLastSync();
-                console.log('Status synced:', data);
+                showToast('Successfully retrieved lights count');
+                console.log('Lights fetched:', data);
             } else {
-                throw new Error(data.message || 'Failed to sync status');
+                throw new Error(data.message || 'Failed to get lights');
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.SYNC_STATUS, error);
             updateStatusDots(false);
             bulbCount.classList.remove('bulb-count--visible');
+            showToast('Failed to get lights status', 'error');
+        } finally {
+            setSyncingState(false);
+        }
+    }
+
+    async function handleSync() {
+        setSyncingState(true);
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}${ENDPOINTS.SYNC}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast(data.message);
+                updateStatusDots(true);
+                updateLastSync();
+                if (data.message.match(/(\d+)\s+light/)) {
+                    const count = parseInt(data.message.match(/(\d+)\s+light/)[1]);
+                    updateBulbCount(count);
+                }
+            } else {
+                throw new Error(data.message || 'Failed to sync lights');
+            }
+        } catch (error) {
+            console.error(ERROR_MESSAGES.SYNC_STATUS, error);
+            updateStatusDots(false);
+            showToast('Failed to sync lights', 'error');
         } finally {
             setSyncingState(false);
         }
@@ -69,7 +116,9 @@ export function initializeStatusIndicators(config) {
     return {
         updateStatusDots,
         updateLastSync,
-        handleSync
+        handleGetLights,
+        handleSync,
+        showToast
     };
 }
 
