@@ -21,10 +21,6 @@ export async function POST() {
     {
       message: response.message,
       success: response.success,
-      data: {
-        count: response.count,
-        bulbs: response.bulbs
-      }
     },
     {
       status: response.success ? 200 : 404,
