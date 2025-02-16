@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LightsService } from '../services/lightsService';
 import {
   LightControlError,
   InvalidInputError,
   ProcessTimeoutError,
   SystemError
 } from '../errors/lightControlErrors';
+import lightsService from '../services/lightsService';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
     const color = req.nextUrl.searchParams.get('color')?.split(',').map(Number);
     const intensity = Number(req.nextUrl.searchParams.get('intensity'));
 
-    const lightsService = LightsService.getInstance();
     let response;
 
     console.log('Action received:', action);
@@ -112,22 +111,22 @@ export async function GET(req: NextRequest) {
         );
 
       default:
-        console.log('Getting all the lights in the network');
-        response = await lightsService.discoverLights();
+        const bulbs = lightsService.getBulbs()
+
         return NextResponse.json(
           {
-            message: response.message,
-            success: response.success,
+            message: `Found ${bulbs.length} light(s) on the network`,
+            success: true,
             data: {
-              count: response.count,
-              bulbs: response.bulbs
+              count: bulbs.length,
+              bulbs: bulbs
             }
           },
           {
-            status: response.success ? 200 : 404,
+            status: 200,
             headers: corsHeaders
           }
-        );
+        )
     }
   } catch (error) {
     console.error('Error in lights API:', error);

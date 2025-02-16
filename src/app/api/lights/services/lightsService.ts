@@ -17,7 +17,7 @@ interface LightResponse {
   bulbs?: string[];
 }
 
-export class LightsService {
+class LightsService {
   private static instance: LightsService;
   private bulbs: string[] = [];
   private processPool: ProcessPool;
@@ -28,6 +28,7 @@ export class LightsService {
 
   static getInstance(): LightsService {
     if (!LightsService.instance) {
+      console.log('Creating new instance of light service')
       LightsService.instance = new LightsService();
     }
     return LightsService.instance;
@@ -43,7 +44,7 @@ export class LightsService {
 
   private validateIntensity(intensity: number): void {
     if (typeof intensity !== 'number' || intensity < 0 || intensity > 255) {
-      throw new InvalidInputError('Intensity must be a number between 0 and 100');
+      throw new InvalidInputError('Intensity must be a number between 0 and 255');
     }
   }
 
@@ -185,14 +186,17 @@ export class LightsService {
           const response = await this.processPool.executeScript('get_lights');
           const data = this.parseResponse(response);
           if (data.success && data.bulbs) {
+            console.log('Saving bulbs')
             this.setBulbs(data.bulbs);
+            console.log(`Bulbs 1 : ${this.bulbs}`)
           }
-          return data;
+          return data
         } catch (error) {
+          console.log('light service exception', error)
           if (error instanceof LightControlError) {
-            throw error;
+            throw error
           }
-          throw new SystemError('Failed to discover lights');
+          throw new SystemError('Failed to discover lights')
         }
       },
       config.lights.discovery.timeout
@@ -200,17 +204,23 @@ export class LightsService {
   }
 
   cleanup(): void {
-    this.processPool.cleanup();
+    console.log('Cleaning up')
+    this.processPool.cleanup()
+    console.log(`Bulbs 2 : ${this.bulbs}`)
   }
 }
 
+// Export a single instance
+const lightsService = LightsService.getInstance()
+export default lightsService
+
 // Handle cleanup on process termination
 process.on('SIGINT', () => {
-  console.log('Cleaning up LightsService...');
-  LightsService.getInstance().cleanup();
+  console.log('Cleaning up LightsService...')
+  LightsService.getInstance().cleanup()
 });
 
 process.on('SIGTERM', () => {
-  console.log('Cleaning up LightsService...');
-  LightsService.getInstance().cleanup();
-});
+  console.log('Cleaning up LightsService...')
+  LightsService.getInstance().cleanup()
+})
