@@ -1,4 +1,4 @@
-import { ProcessPool } from './processPool';
+import { ProcessManager } from './processManager';
 import { config } from '../config/systemConfig';
 import {
   LightControlError,
@@ -20,10 +20,10 @@ interface LightResponse {
 export class LightsService {
   private static instance: LightsService;
   private bulbs: string[] = [];
-  private processPool: ProcessPool;
+  private processManager: ProcessManager;
   
   private constructor() {
-    this.processPool = ProcessPool.getInstance();
+    this.processManager = ProcessManager.getInstance();
   }
 
   static getInstance(): LightsService {
@@ -85,7 +85,7 @@ export class LightsService {
   async turnOnLights(): Promise<LightResponse> {
     return this.executeWithTimeout(async () => {
       try {
-        const response = await this.processPool.executeScript('turn_on_lights', this.bulbs);
+        const response = await this.processManager.executeScript('turn_on_lights', this.bulbs);
         return this.parseResponse(response);
       } catch (error) {
         if (error instanceof LightControlError) {
@@ -99,7 +99,7 @@ export class LightsService {
   async turnOffLights(): Promise<LightResponse> {
     return this.executeWithTimeout(async () => {
       try {
-        const response = await this.processPool.executeScript('turn_off_lights', this.bulbs);
+        const response = await this.processManager.executeScript('turn_off_lights', this.bulbs);
         return this.parseResponse(response);
       } catch (error) {
         if (error instanceof LightControlError) {
@@ -119,7 +119,7 @@ export class LightsService {
           ips: this.bulbs,
           intensity
         };
-        const response = await this.processPool.executeScript(
+        const response = await this.processManager.executeScript(
           'set_lights_warm_white',
           [JSON.stringify(request)]
         );
@@ -142,7 +142,7 @@ export class LightsService {
           ips: this.bulbs,
           intensity
         };
-        const response = await this.processPool.executeScript(
+        const response = await this.processManager.executeScript(
           'set_lights_cold_white',
           [JSON.stringify(request)]
         );
@@ -165,7 +165,7 @@ export class LightsService {
           ips: this.bulbs,
           color
         };
-        const response = await this.processPool.executeScript(
+        const response = await this.processManager.executeScript(
           'set_lights_color',
           [JSON.stringify(request)]
         );
@@ -183,7 +183,7 @@ export class LightsService {
     return this.executeWithTimeout(
       async () => {
         try {
-          const response = await this.processPool.executeScript('get_lights');
+          const response = await this.processManager.executeScript('get_lights');
           const data = this.parseResponse(response);
           if (data.success && data.bulbs) {
             console.log('Saving bulbs')
@@ -205,7 +205,7 @@ export class LightsService {
 
   cleanup(): void {
     console.log('Cleaning up')
-    this.processPool.cleanup()
+    this.processManager.cleanup()
     console.log(`Bulbs 2 : ${this.bulbs}`)
   }
 }
@@ -219,4 +219,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   console.log('Cleaning up LightsService...')
   LightsService.getInstance().cleanup()
-})
+});

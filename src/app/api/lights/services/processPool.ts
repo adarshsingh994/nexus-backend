@@ -24,7 +24,9 @@ export class ProcessPool {
   private readonly defaultMaxRetries: number = 3;
   private readonly defaultBackoffFactor: number = 1.5;
 
-  private constructor() {}
+  private constructor() {
+    console.log('Creating new instance of ProcessPool');
+  }
 
   static getInstance(): ProcessPool {
     if (!ProcessPool.instance) {
@@ -199,11 +201,14 @@ export class ProcessPool {
   }
 }
 
+// Import the global instance instead of creating cleanup handlers here
+import { processPool } from './globalInstances';
+
 // Handle cleanup on process termination
 process.on('SIGINT', () => {
-  ProcessPool.getInstance().cleanup();
+  processPool.cleanup();
 });
 
 process.on('SIGTERM', () => {
-  ProcessPool.getInstance().cleanup();
+  processPool.cleanup();
 });
