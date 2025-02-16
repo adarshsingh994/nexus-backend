@@ -17,7 +17,7 @@ interface LightResponse {
   bulbs?: string[];
 }
 
-class LightsService {
+export class LightsService {
   private static instance: LightsService;
   private bulbs: string[] = [];
   private processPool: ProcessPool;
@@ -209,10 +209,6 @@ class LightsService {
     console.log(`Bulbs 2 : ${this.bulbs}`)
   }
 }
-
-// Export a single instance
-const lightsService = LightsService.getInstance()
-export default lightsService
 
 // Handle cleanup on process termination
 process.on('SIGINT', () => {

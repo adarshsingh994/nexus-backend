@@ -5,7 +5,7 @@ import {
   ProcessTimeoutError,
   SystemError
 } from '../errors/lightControlErrors';
-import lightsService from '../services/lightsService';
+import lightsService from '../services/globalInstance';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

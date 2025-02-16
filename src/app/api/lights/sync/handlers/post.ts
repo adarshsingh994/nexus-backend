@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import lightsService from '../../services/lightsService'
+import lightsService from '../../services/globalInstance'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
