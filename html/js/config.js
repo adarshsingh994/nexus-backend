@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = 'http://192.168.18.4:3000/api';
+export const API_BASE_URL = 'http://192.168.18.169:3000/api';
 
 // API Endpoints
 export const ENDPOINTS = {

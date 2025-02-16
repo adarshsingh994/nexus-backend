@@ -70,7 +70,7 @@ class ConfigService {
         },
         control: {
           retries: 3,
-          timeout: 10000
+          timeout: 30000
         }
       },
       server: {

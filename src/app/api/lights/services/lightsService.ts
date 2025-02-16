@@ -42,7 +42,7 @@ export class LightsService {
   }
 
   private validateIntensity(intensity: number): void {
-    if (typeof intensity !== 'number' || intensity < 0 || intensity > 100) {
+    if (typeof intensity !== 'number' || intensity < 0 || intensity > 255) {
       throw new InvalidInputError('Intensity must be a number between 0 and 100');
     }
   }
