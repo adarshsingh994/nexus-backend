@@ -5,7 +5,7 @@ import {
   ProcessTimeoutError,
   SystemError
 } from '../errors/lightControlErrors';
-import lightsService from '../services/globalInstance';
+import { lightsService, environmentManager } from '../services/globalInstances';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +18,9 @@ export async function GET(req: NextRequest) {
     const action = req.nextUrl.searchParams.get('action');
     const color = req.nextUrl.searchParams.get('color')?.split(',').map(Number);
     const intensity = Number(req.nextUrl.searchParams.get('intensity'));
+
+    console.log('Initializing environment...');
+    await environmentManager.initialize();
 
     let response;
 

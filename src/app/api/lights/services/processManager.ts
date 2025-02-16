@@ -90,6 +90,7 @@ export class ProcessManager {
   ): Promise<string> {
     try {
       // Ensure Python environment is initialized
+      console.log('Initialising environment manager')
       await environmentManager.initialize();
       
       // Get validated Python path

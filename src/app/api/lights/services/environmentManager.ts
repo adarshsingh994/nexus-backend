@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { spawn } from 'child_process';
 import { SystemError } from '../errors/lightControlErrors';
@@ -82,7 +82,7 @@ export class EnvironmentManager {
       );
 
       const requiredPackages = new Set(
-        (await this.executeCommand('cat', [requirementsPath]))
+        readFileSync(requirementsPath, 'utf-8')
           .split('\n')
           .filter(line => line.trim())
           .map(line => line.split('==')[0].toLowerCase())
@@ -162,12 +162,3 @@ export class EnvironmentManager {
     return this.pythonPath;
   }
 }
-
-// Import the global instance instead of initializing here
-import { environmentManager } from './globalInstances';
-
-// Initialize environment on startup
-environmentManager.initialize().catch(error => {
-  console.error('Failed to initialize Python environment:', error);
-  process.exit(1);
-});

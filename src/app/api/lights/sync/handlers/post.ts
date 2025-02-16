@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import lightsService from '../../services/globalInstance'
+import { lightsService, environmentManager } from '../../services/globalInstances'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,23 +8,39 @@ const corsHeaders = {
 }
 
 export async function POST() {
-  console.log('Sync Started')
-  console.log('Getting all the lights in the network')
-  console.log('Creating light service')
-  let response
+  try {
+    console.log('Initializing environment...')
+    await environmentManager.initialize()
+    
+    console.log('Sync Started')
+    console.log('Getting all the lights in the network')
+    console.log('Creating light service')
 
-  console.log('Discovering lights')
-  response = await lightsService.discoverLights()
-  console.log('Light Discovery', response)
+    console.log('Discovering lights')
+    const response = await lightsService.discoverLights()
+    console.log('Light Discovery', response)
 
-  return NextResponse.json(
-    {
-      message: response.message,
-      success: response.success,
-    },
-    {
-      status: response.success ? 200 : 404,
-      headers: corsHeaders
-    }
-  )
+    return NextResponse.json(
+      {
+        message: response.message,
+        success: response.success,
+      },
+      {
+        status: response.success ? 200 : 404,
+        headers: corsHeaders
+      }
+    )
+  } catch (error) {
+    console.error('Error in sync POST handler:', error)
+    return NextResponse.json(
+      {
+        message: error instanceof Error ? error.message : 'An unknown error occurred',
+        success: false,
+      },
+      {
+        status: 500,
+        headers: corsHeaders
+      }
+    )
+  }
 }
