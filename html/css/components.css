@@ -1,12 +1,14 @@
 /* Container */
 .container {
     background: var(--surface);
-    border-radius: var(--radius-xl);
-    padding: var(--space-xl);
-    box-shadow: var(--shadow-xl);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-lg);
     border: none;
     position: relative;
     overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 /* Header */
@@ -22,10 +24,10 @@
     bottom: calc(-1 * var(--space-sm));
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
+    width: 40px;
+    height: 2px;
     background: var(--primary);
-    border-radius: 2px;
+    border-radius: 1px;
 }
 
 .header__subtitle {
@@ -38,55 +40,64 @@
 .power-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-    padding: var(--space-lg);
+    gap: var(--space-md);
+    padding: var(--space-md);
     background: var(--surface);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    border: none;
+    box-shadow: var(--shadow-md);
 }
 
 /* Generic Button Styles */
 .button {
-    padding: 1.25rem;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-lg);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
     font-weight: 600;
     color: var(--text);
     background: var(--surface);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: var(--transition);
     width: 100%;
-    min-height: 3.5rem;
+    min-height: 3rem;
     touch-action: manipulation;
 }
 
 .button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     color: var(--primary);
+}
+
+.button:hover i {
+    transform: scale(1.1);
 }
 
 .button:active {
     transform: translateY(0);
-    box-shadow: var(--shadow-inset-md);
+    box-shadow: var(--shadow-inset-sm);
 }
 
 .button--active {
-    box-shadow: var(--shadow-inset-md);
+    box-shadow: var(--shadow-inset-sm);
     color: var(--primary);
 }
 
-.button__icon {
-    font-size: 1.5rem;
+/* Phosphor Icons Styling */
+.button i {
+    font-size: 1.4rem;
+    transition: transform 0.2s ease;
 }
 
 .button--primary {
+    color: var(--primary);
+}
+
+.button--primary i {
     color: var(--primary);
 }
 
@@ -94,12 +105,16 @@
     color: var(--primary-dark);
 }
 
+.button--primary:hover i {
+    color: var(--primary-dark);
+}
+
 /* Status Bar */
 .status-bar {
     display: flex;
     justify-content: center;
-    gap: var(--space-xl);
-    margin: var(--space-lg) 0;
+    gap: var(--space-lg);
+    margin: var(--space-md) 0;
     flex-wrap: wrap;
 }
 
@@ -107,24 +122,23 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: 0.75rem 1.25rem;
+    padding: 0.6rem 1rem;
     background: var(--surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    border: none;
     transition: var(--transition);
 }
 
 .status-indicator:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .status-indicator__dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: var(--primary);
-    box-shadow: 0 0 8px var(--primary-light);
+    box-shadow: 0 0 6px var(--primary-light);
 }
 
 .status-indicator__dot--offline {
@@ -141,16 +155,16 @@
 /* Section */
 .section {
     background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
     border: none;
     transition: var(--transition);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
 }
 
 .section:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .section__header {
@@ -159,7 +173,7 @@
     align-items: center;
     margin-bottom: var(--space-md);
     padding-bottom: var(--space-sm);
-    border-bottom: 2px solid var(--surface-dark);
+    border-bottom: 1px solid var(--surface-dark);
 }
 
 .section__label {
@@ -171,7 +185,7 @@
 .section__helper-text {
     font-size: var(--text-sm);
     color: var(--text-light);
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-md);
     text-align: center;
 }
 
@@ -191,20 +205,20 @@
 
 .color-picker {
     width: 100%;
-    height: 50px;
+    height: 44px;
     border-radius: var(--radius-md);
     cursor: pointer;
     background: var(--surface);
     transition: var(--transition);
-    box-shadow: var(--shadow-inset-md);
+    box-shadow: var(--shadow-inset-sm);
 }
 
 .color-picker:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .color-picker::-webkit-color-swatch-wrapper {
-    padding: 4px;
+    padding: 3px;
     border-radius: var(--radius-md);
 }
 
@@ -229,7 +243,7 @@
 .slider-value {
     font-size: var(--text-sm);
     font-weight: 500;
-    padding: 0.35rem 0.85rem;
+    padding: 0.25rem 0.75rem;
     background: var(--surface);
     color: var(--primary-dark);
     border-radius: var(--radius-sm);
@@ -238,11 +252,11 @@
 
 .slider {
     width: 100%;
-    height: 12px;
-    border-radius: 6px;
+    height: 10px;
+    border-radius: 5px;
     -webkit-appearance: none;
     background: var(--surface);
-    margin: var(--space-md) 0;
+    margin: var(--space-sm) 0;
     box-shadow: var(--shadow-inset-sm);
     border: none;
     touch-action: manipulation;
@@ -250,8 +264,8 @@
 
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: var(--surface);
     cursor: pointer;
@@ -261,7 +275,7 @@
 }
 
 .slider::-webkit-slider-thumb:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
 
@@ -276,7 +290,7 @@
     pointer-events: none;
 }
 
-.button--syncing .button__icon {
+.button--syncing i {
     animation: rotate 1s linear infinite;
 }
 
@@ -289,7 +303,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -312,7 +326,7 @@
 }
 
 .bulb-count__number {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--primary);
     display: block;
@@ -326,7 +340,7 @@
 
 /* Footer */
 .footer {
-    margin-top: var(--space-xl);
+    margin-top: var(--space-lg);
     text-align: center;
     font-size: var(--text-sm);
     color: var(--text-light);
@@ -339,16 +353,16 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-md);
 }
 
 /* Toast notifications */
 .toast {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 8px;
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
     color: white;
     font-weight: 500;
     opacity: 0;
@@ -372,43 +386,67 @@
 
 /* Mobile Responsive Adjustments */
 @media (max-width: 480px) {
+    .container {
+        padding: var(--space-md);
+    }
+
     .button {
-        padding: 1rem;
-        font-size: var(--text-base);
-        min-height: 3rem;
+        padding: 0.8rem;
+        font-size: var(--text-sm);
+        min-height: 2.8rem;
+    }
+
+    .button i {
+        font-size: 1.2rem;
     }
 
     .power-controls,
     .white-light-controls,
     .system-controls__buttons {
-        gap: var(--space-md);
+        gap: var(--space-sm);
     }
 
     .section {
         padding: var(--space-md);
+        margin-bottom: var(--space-sm);
     }
 
     .slider::-webkit-slider-thumb {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
     }
 
     .status-bar {
         flex-direction: column;
-        align-items: center;
-        gap: var(--space-md);
+        align-items: stretch;
+        gap: var(--space-sm);
     }
 
     .status-indicator {
-        width: 100%;
         justify-content: center;
+    }
+
+    .section__header {
+        margin-bottom: var(--space-sm);
+    }
+
+    .color-picker {
+        height: 40px;
     }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
+    .container {
+        padding: var(--space-lg);
+    }
+
     .button {
-        padding: 1.1rem;
+        padding: 0.9rem;
         font-size: var(--text-base);
+    }
+
+    .button i {
+        font-size: 1.3rem;
     }
 
     .power-controls,
@@ -419,5 +457,9 @@
 
     .status-bar {
         gap: var(--space-md);
+    }
+
+    .section {
+        margin-bottom: var(--space-md);
     }
 }

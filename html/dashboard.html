@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/mood-colors.css">
     <link rel="stylesheet" href="css/layout.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -26,11 +28,11 @@
             </div>
             <div class="power-controls">
                 <button id="turnOn" class="button button--primary">
-                    <span class="button__icon">☀️</span>
+                    <i class="fas fa-sun"></i>
                     Turn On
                 </button>
                 <button id="turnOff" class="button">
-                    <span class="button__icon">🌙</span>
+                    <i class="fas fa-moon"></i>
                     Turn Off
                 </button>
             </div>
@@ -50,11 +52,11 @@
                 <input type="range" class="slider" id="whiteSlider" min="0" max="255" value="255">
                 <div class="white-light-controls">
                     <button id="setWarmWhite" class="button button--primary">
-                        <span class="button__icon">🌅</span>
+                        <i class="fas fa-temperature-high"></i>
                         Warm
                     </button>
                     <button id="setColdWhite" class="button button--primary">
-                        <span class="button__icon">❄️</span>
+                        <i class="fas fa-snowflake"></i>
                         Cold
                     </button>
                 </div>
@@ -141,11 +143,11 @@
             <div class="section__helper-text">Sync and update system status</div>
             <div class="system-controls__buttons">
                 <button id="getLightsButton" class="button button--primary">
-                    <span class="button__icon">🔍</span>
+                    <i class="fas fa-search"></i>
                     Get Lights
                 </button>
                 <button id="syncButton" class="button button--primary">
-                    <span class="button__icon">🔄</span>
+                    <i class="fas fa-sync-alt"></i>
                     Sync
                 </button>
             </div>

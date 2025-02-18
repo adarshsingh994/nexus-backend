@@ -6,12 +6,23 @@ import { API_BASE_URL } from './config.js';
 
 // Initialize all modules when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Test API connection
+    // Test API connection and get initial lights status
     console.log('fetching')
     fetch(`${API_BASE_URL}/lights`)
         .then(response => response.json())
         .then(data => {
             console.log('API connection successful:', data);
+            if (data.success) {
+                document.querySelectorAll('.status-indicator__dot').forEach(dot => {
+                    dot.classList.remove('status-indicator__dot--offline');
+                });
+                if (data.data && typeof data.data.count === 'number') {
+                    const bulbCount = document.querySelector('.bulb-count');
+                    const bulbCountNumber = document.querySelector('.bulb-count__number');
+                    bulbCountNumber.textContent = data.data.count;
+                    bulbCount.classList.add('bulb-count--visible');
+                }
+            }
         })
         .catch(error => {
             console.error('API connection failed:', error);
@@ -42,8 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initial setup
-    modules.statusIndicators.updateSliderValue();
-    modules.statusIndicators.handleSync();
+    modules.whiteControls.updateSliderValue();
 
     // Add error handling for fetch requests
     window.addEventListener('unhandledrejection', event => {
