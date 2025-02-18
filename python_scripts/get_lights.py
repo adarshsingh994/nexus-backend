@@ -29,7 +29,9 @@ async def get_bulb_info(bulb: wizlight):
                 "rgb": [r, g, b],
                 "scene": state.get_scene(),
                 "isOn": state.get_state(),
-                "brightness": state.get_brightness()
+                "brightness": state.get_brightness(),
+                "warmWhite": state.get_warm_white(),
+                "coldWhite": state.get_cold_white(),
             },
             "features": {
                 "brightness": bulb_type.features.brightness,
