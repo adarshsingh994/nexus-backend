@@ -114,7 +114,13 @@ export async function GET(req: NextRequest) {
         );
 
       default:
-        const bulbs = lightsService.getBulbs()
+        const bulbs = lightsService.getBulbs().map(bulb => ({
+          ...bulb,
+          state: {
+            ...bulb.state,
+            rgb: bulb.state.rgb ? Array.from(bulb.state.rgb) : undefined
+          }
+        }));
 
         return NextResponse.json(
           {
