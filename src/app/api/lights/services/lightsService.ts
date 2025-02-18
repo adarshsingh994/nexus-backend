@@ -7,19 +7,11 @@ import {
   SystemError,
   ErrorCode
 } from '../errors/lightControlErrors';
-
-interface LightResponse {
-  message: string;
-  overall_success?: boolean;
-  success?: boolean;
-  results?: Record<string, { success: boolean; message: string }>;
-  count?: number;
-  bulbs?: string[];
-}
+import { BulbInfo, LightResponse } from '../types/bulb';
 
 export class LightsService {
   private static instance: LightsService;
-  private bulbs: string[] = [];
+  private bulbs: BulbInfo[] = [];
   private processManager: ProcessManager;
   
   private constructor() {
@@ -34,11 +26,11 @@ export class LightsService {
     return LightsService.instance;
   }
 
-  getBulbs(): string[] {
+  getBulbs(): BulbInfo[] {
     return this.bulbs;
   }
 
-  private setBulbs(newBulbs: string[]): void {
+  private setBulbs(newBulbs: BulbInfo[]): void {
     this.bulbs = newBulbs;
   }
 
@@ -85,7 +77,10 @@ export class LightsService {
   async turnOnLights(): Promise<LightResponse> {
     return this.executeWithTimeout(async () => {
       try {
-        const response = await this.processManager.executeScript('turn_on_lights', this.bulbs);
+        const request = {
+          ips: this.bulbs.map(bulb => bulb.ip)
+        };
+        const response = await this.processManager.executeScript('turn_on_lights', [JSON.stringify(request)]);
         return this.parseResponse(response);
       } catch (error) {
         if (error instanceof LightControlError) {
@@ -99,7 +94,10 @@ export class LightsService {
   async turnOffLights(): Promise<LightResponse> {
     return this.executeWithTimeout(async () => {
       try {
-        const response = await this.processManager.executeScript('turn_off_lights', this.bulbs);
+        const request = {
+          ips: this.bulbs.map(bulb => bulb.ip)
+        };
+        const response = await this.processManager.executeScript('turn_off_lights', [JSON.stringify(request)]);
         return this.parseResponse(response);
       } catch (error) {
         if (error instanceof LightControlError) {
@@ -116,7 +114,7 @@ export class LightsService {
     return this.executeWithTimeout(async () => {
       try {
         const request = {
-          ips: this.bulbs,
+          ips: this.bulbs.map(bulb => bulb.ip),
           intensity
         };
         const response = await this.processManager.executeScript(
@@ -139,7 +137,7 @@ export class LightsService {
     return this.executeWithTimeout(async () => {
       try {
         const request = {
-          ips: this.bulbs,
+          ips: this.bulbs.map(bulb => bulb.ip),
           intensity
         };
         const response = await this.processManager.executeScript(
@@ -162,7 +160,7 @@ export class LightsService {
     return this.executeWithTimeout(async () => {
       try {
         const request = {
-          ips: this.bulbs,
+          ips: this.bulbs.map(bulb => bulb.ip),
           color
         };
         const response = await this.processManager.executeScript(
@@ -188,7 +186,7 @@ export class LightsService {
           if (data.success && data.bulbs) {
             console.log('Saving bulbs')
             this.setBulbs(data.bulbs);
-            console.log(`Bulbs 1 : ${this.bulbs}`)
+            console.log(`Discovered ${this.bulbs.length} bulbs with details`)
           }
           return data
         } catch (error) {
@@ -206,7 +204,7 @@ export class LightsService {
   cleanup(): void {
     console.log('Cleaning up')
     this.processManager.cleanup()
-    console.log(`Bulbs 2 : ${this.bulbs}`)
+    console.log(`Stored bulbs: ${JSON.stringify(this.bulbs, null, 2)}`)
   }
 }
 
