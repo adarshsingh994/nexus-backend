@@ -21,32 +21,13 @@ export class ProcessManager {
   private metricsInterval: NodeJS.Timeout | null = null;
   
   private constructor() {
-    throw new Error('Use ProcessManager.createInstance() instead');
-  }
-
-  private static async initializeInstance(): Promise<ProcessManager> {
-    const instance = Object.create(ProcessManager.prototype);
     console.log('Creating new instance of ProcessManager');
-    
-    // Initialize environment first
-    try {
-      await environmentManager.initialize();
-    } catch (error) {
-      console.error('Failed to initialize environment:', error);
-      throw error;
-    }
-    
-    // Initialize other properties
-    instance.processes = new Map();
-    instance.metricsInterval = null;
-    instance.startMetricsCollection();
-    
-    return instance;
+    this.startMetricsCollection();
   }
 
-  static async getInstance(): Promise<ProcessManager> {
+  static getInstance(): ProcessManager {
     if (!ProcessManager.instance) {
-      ProcessManager.instance = await ProcessManager.initializeInstance();
+      ProcessManager.instance = new ProcessManager();
     }
     return ProcessManager.instance;
   }
@@ -108,7 +89,11 @@ export class ProcessManager {
     args: string[] = []
   ): Promise<string> {
     try {
-      // Get validated Python path from already initialized environment
+      // Ensure Python environment is initialized
+      console.log('Initialising environment manager')
+      await environmentManager.initialize();
+      
+      // Get validated Python path
       const pythonPath = environmentManager.getPythonPath();
       
       // Build script path
@@ -143,12 +128,10 @@ export class ProcessManager {
 import { processManager } from './globalInstances';
 
 // Handle cleanup on process termination
-process.on('SIGINT', async () => {
-  const manager = await processManager;
-  manager.cleanup();
+process.on('SIGINT', () => {
+  processManager.cleanup();
 });
 
-process.on('SIGTERM', async () => {
-  const manager = await processManager;
-  manager.cleanup();
+process.on('SIGTERM', () => {
+  processManager.cleanup();
 });
