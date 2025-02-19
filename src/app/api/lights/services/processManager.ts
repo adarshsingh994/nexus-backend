@@ -21,13 +21,32 @@ export class ProcessManager {
   private metricsInterval: NodeJS.Timeout | null = null;
   
   private constructor() {
-    console.log('Creating new instance of ProcessManager');
-    this.startMetricsCollection();
+    throw new Error('Use ProcessManager.createInstance() instead');
   }
 
-  static getInstance(): ProcessManager {
+  private static async initializeInstance(): Promise<ProcessManager> {
+    const instance = Object.create(ProcessManager.prototype);
+    console.log('Creating new instance of ProcessManager');
+    
+    // Initialize environment first
+    try {
+      await environmentManager.initialize();
+    } catch (error) {
+      console.error('Failed to initialize environment:', error);
+      throw error;
+    }
+    
+    // Initialize other properties
+    instance.processes = new Map();
+    instance.metricsInterval = null;
+    instance.startMetricsCollection();
+    
+    return instance;
+  }
+
+  static async getInstance(): Promise<ProcessManager> {
     if (!ProcessManager.instance) {
-      ProcessManager.instance = new ProcessManager();
+      ProcessManager.instance = await ProcessManager.initializeInstance();
     }
     return ProcessManager.instance;
   }
@@ -89,11 +108,7 @@ export class ProcessManager {
     args: string[] = []
   ): Promise<string> {
     try {
-      // Ensure Python environment is initialized
-      console.log('Initialising environment manager')
-      await environmentManager.initialize();
-      
-      // Get validated Python path
+      // Get validated Python path from already initialized environment
       const pythonPath = environmentManager.getPythonPath();
       
       // Build script path
@@ -128,10 +143,12 @@ export class ProcessManager {
 import { processManager } from './globalInstances';
 
 // Handle cleanup on process termination
-process.on('SIGINT', () => {
-  processManager.cleanup();
+process.on('SIGINT', async () => {
+  const manager = await processManager;
+  manager.cleanup();
 });
 
-process.on('SIGTERM', () => {
-  processManager.cleanup();
+process.on('SIGTERM', async () => {
+  const manager = await processManager;
+  manager.cleanup();
 });
