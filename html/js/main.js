@@ -40,20 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
             whiteValue: document.getElementById('whiteValue'),
             lastSync: document.getElementById('lastSync'),
             statusDots: document.querySelectorAll('.status-indicator__dot'),
-            colorButtons: document.querySelectorAll('.color-btn')
+            colorButtons: document.querySelectorAll('.color-btn'),
+            powerToggle: document.getElementById('powerToggle')
         }
     };
 
-    // Initialize all modules with shared configuration
-    const modules = {
-        lightControls: initializeLightControls(config),
-        colorControls: initializeColorControls(config),
-        statusIndicators: initializeStatusIndicators(config),
-        whiteControls: initializeWhiteControls(config)
-    };
+    try {
+        // Initialize all modules with shared configuration
+        const modules = {
+            lightControls: initializeLightControls(config),
+            colorControls: initializeColorControls(config),
+            statusIndicators: initializeStatusIndicators(config),
+            whiteControls: initializeWhiteControls(config)
+        };
 
-    // Initial setup
-    modules.whiteControls.updateSliderValue();
+        // Log initialization status
+        console.log('Modules initialized:', {
+            lightControls: !!modules.lightControls,
+            colorControls: !!modules.colorControls,
+            statusIndicators: !!modules.statusIndicators,
+            whiteControls: !!modules.whiteControls
+        });
+
+        // Initial setup
+        if (modules.whiteControls) {
+            modules.whiteControls.updateSliderValue();
+        }
+    } catch (error) {
+        console.error('Error initializing modules:', error);
+    }
 
     // Add error handling for fetch requests
     window.addEventListener('unhandledrejection', event => {
