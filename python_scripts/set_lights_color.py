@@ -3,6 +3,9 @@ import json
 import asyncio
 import logging
 from pywizlight import wizlight, PilotBuilder
+from typing import List, Dict, Any
+from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
 
 # Configure logging
 logging.basicConfig(
@@ -11,55 +14,111 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def set_light_color(ip, color):
-    light = None
-    try:
-        logger.info(f"Attempting to set color for light at IP: {ip} with RGB: {color}")
-        light = wizlight(ip)
-        await light.turn_on(PilotBuilder(rgb=(color[0], color[1], color[2])))
-        logger.info(f"Successfully set color for light at IP: {ip}")
-        return {
-            "success": True,
-            "ip": ip,
-            "message": f"Light set to RGB color ({color[0]}, {color[1]}, {color[2]}) successfully"
-        }
-    except Exception as e:
-        error_message = str(e)
-        logger.error(f"Error setting color for light at IP {ip}: {error_message}")
-        return {
-            "success": False,
-            "ip": ip,
-            "message": error_message
-        }
-    finally:
-        if light is not None:
-            try:
-                await light.async_close()
-            except Exception as e:
-                logger.error(f"Error closing connection to light at IP {ip}: {str(e)}")
+# Constants for batching and connection management
+BATCH_SIZE = 50  # Number of lights to process in each batch
+MAX_CONCURRENT_CONNECTIONS = 100  # Maximum number of concurrent connections
+CONNECTION_TIMEOUT = 5  # Timeout for each connection attempt in seconds
+RETRY_ATTEMPTS = 3  # Number of retry attempts for failed operations
 
-async def set_lights_color(ips, color):
-    logger.info(f"Starting to set color for {len(ips)} lights with RGB: {color}")
-    tasks = [set_light_color(ip, color) for ip in ips]
-    results = await asyncio.gather(*tasks)
-    
-    overall_success = all(result["success"] for result in results)
-    logger.info(f"Operation completed. Overall success: {overall_success}")
-    
-    return {
-        "overall_success": overall_success,
-        "results": results
-    }
+@dataclass
+class LightOperation:
+    ip: str
+    color: tuple[int, int, int]
+    retries: int = 0
+
+class LightController:
+    def __init__(self):
+        self.semaphore = asyncio.Semaphore(MAX_CONCURRENT_CONNECTIONS)
+        self.connection_pool: Dict[str, wizlight] = {}
+        self.executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CONNECTIONS)
+
+    async def get_connection(self, ip: str) -> wizlight:
+        """Get or create a connection to a light."""
+        if ip not in self.connection_pool:
+            self.connection_pool[ip] = wizlight(ip)
+        return self.connection_pool[ip]
+
+    async def close_connections(self):
+        """Close all connections in the pool."""
+        close_tasks = []
+        for ip, light in self.connection_pool.items():
+            try:
+                close_tasks.append(light.async_close())
+            except Exception as e:
+                logger.error(f"Error closing connection to {ip}: {str(e)}")
+        
+        if close_tasks:
+            await asyncio.gather(*close_tasks, return_exceptions=True)
+        self.connection_pool.clear()
+
+    async def set_light_color(self, operation: LightOperation) -> Dict[str, Any]:
+        """Set color for a single light with retry logic."""
+        async with self.semaphore:
+            try:
+                light = await self.get_connection(operation.ip)
+                await asyncio.wait_for(
+                    light.turn_on(PilotBuilder(rgb=operation.color)),
+                    timeout=CONNECTION_TIMEOUT
+                )
+                return {
+                    "success": True,
+                    "ip": operation.ip,
+                    "message": f"Light set to RGB color {operation.color} successfully"
+                }
+            except asyncio.TimeoutError:
+                if operation.retries < RETRY_ATTEMPTS:
+                    operation.retries += 1
+                    logger.warning(f"Timeout for {operation.ip}, retry {operation.retries}")
+                    return await self.set_light_color(operation)
+                return {
+                    "success": False,
+                    "ip": operation.ip,
+                    "message": f"Operation timed out after {RETRY_ATTEMPTS} attempts"
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "ip": operation.ip,
+                    "message": str(e)
+                }
+
+    async def process_batch(self, operations: List[LightOperation]) -> List[Dict[str, Any]]:
+        """Process a batch of light operations."""
+        tasks = [self.set_light_color(op) for op in operations]
+        return await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def set_lights_color(self, ips: List[str], color: tuple[int, int, int]) -> Dict[str, Any]:
+        """Set color for multiple lights with batching."""
+        operations = [LightOperation(ip=ip, color=color) for ip in ips]
+        results = []
+        
+        # Process in batches
+        for i in range(0, len(operations), BATCH_SIZE):
+            batch = operations[i:i + BATCH_SIZE]
+            logger.info(f"Processing batch {i//BATCH_SIZE + 1} of {(len(operations)-1)//BATCH_SIZE + 1}")
+            batch_results = await self.process_batch(batch)
+            results.extend(batch_results)
+
+        # Calculate success rate
+        successful = sum(1 for r in results if isinstance(r, dict) and r.get("success", False))
+        success_rate = (successful / len(results)) * 100 if results else 0
+
+        return {
+            "overall_success": successful == len(results),
+            "success_rate": f"{success_rate:.2f}%",
+            "total_processed": len(results),
+            "successful_operations": successful,
+            "failed_operations": len(results) - successful,
+            "results": results
+        }
 
 async def main():
-    loop = None
+    controller = None
     try:
         logger.info("Parsing input parameters")
         data = json.loads(sys.argv[1])
         ips = data['ips']
         color = data['color']
-        
-        logger.info(f"Received request to set color RGB({color[0]}, {color[1]}, {color[2]}) for lights: {ips}")
         
         if not ips:
             logger.warning("No IP addresses provided")
@@ -69,11 +128,9 @@ async def main():
                 "results": []
             }
         else:
-            result = await set_lights_color(ips, color)
-            response = {
-                "overall_success": result["overall_success"],
-                "results": result["results"]
-            }
+            controller = LightController()
+            result = await controller.set_lights_color(ips, tuple(color))
+            response = result
         
         print(json.dumps(response))
         logger.info("Response sent")
@@ -91,6 +148,9 @@ async def main():
             "message": f"Missing required parameter: {str(e)}",
             "results": []
         }))
+    finally:
+        if controller:
+            await controller.close_connections()
 
 if __name__ == '__main__':
     if sys.platform == 'win32':
