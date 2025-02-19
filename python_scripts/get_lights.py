@@ -6,8 +6,8 @@ from pywizlight import wizlight, PilotBuilder, discovery
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-import os
 from dotenv import load_dotenv
+from config import *
 
 # Load environment variables
 load_dotenv()
@@ -18,13 +18,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# Constants for discovery and connection management
-BATCH_SIZE = 50  # Number of lights to process in each batch
-MAX_CONCURRENT_CONNECTIONS = 100  # Maximum number of concurrent connections
-CONNECTION_TIMEOUT = 5  # Timeout for each connection attempt in seconds
-RETRY_ATTEMPTS = 3  # Number of retry attempts for failed operations
-BROADCAST_ADDRESS = os.getenv('BROADCAST_ADDRESS', '192.168.18.255')
 
 @dataclass
 class BulbInfo:

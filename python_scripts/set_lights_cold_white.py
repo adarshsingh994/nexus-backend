@@ -6,6 +6,7 @@ from pywizlight import wizlight, PilotBuilder
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
+from config import *
 
 # Configure logging
 logging.basicConfig(
@@ -13,12 +14,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# Constants for batching and connection management
-BATCH_SIZE = 50  # Number of lights to process in each batch
-MAX_CONCURRENT_CONNECTIONS = 100  # Maximum number of concurrent connections
-CONNECTION_TIMEOUT = 5  # Timeout for each connection attempt in seconds
-RETRY_ATTEMPTS = 3  # Number of retry attempts for failed operations
 
 @dataclass
 class LightOperation:
