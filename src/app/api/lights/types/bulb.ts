@@ -4,6 +4,8 @@ export interface BulbState {
     scene?: string;
     isOn: boolean;
     brightness?: number;
+    warmWhite?: number;
+    coldWhite?: number;
 }
 
 export interface BulbFeatures {
