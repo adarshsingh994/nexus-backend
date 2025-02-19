@@ -65,11 +65,33 @@ async def main():
                 "results": []
             }
         else:
-            result = await turn_on_lights(args)
-            response = {
-                "overall_success": result["overall_success"],
-                "results": result["results"]
-            }
+            try:
+                # Parse the JSON string from the first argument
+                request = json.loads(args[0])
+                # Extract the IPs array from the parsed JSON
+                ips = request.get('ips', [])
+                
+                if not ips:
+                    logger.warning("No IP addresses found in request")
+                    response = {
+                        "overall_success": False,
+                        "message": "No IP addresses found in request",
+                        "results": []
+                    }
+                else:
+                    logger.info(f"Parsed IPs from request: {ips}")
+                    result = await turn_on_lights(ips)
+                    response = {
+                        "overall_success": result["overall_success"],
+                        "results": result["results"]
+                    }
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse JSON request: {str(e)}")
+                response = {
+                    "overall_success": False,
+                    "message": f"Invalid JSON request: {str(e)}",
+                    "results": []
+                }
         
         print(json.dumps(response))
         logger.info("Response sent")
