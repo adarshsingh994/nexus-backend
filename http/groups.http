@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:3000/api
+
+### List all groups
+GET {{baseUrl}}/groups
+Content-Type: application/json
+
+### Create a new group
+POST {{baseUrl}}/groups
+Content-Type: application/json
+
+{
+    "id": "living-room",
+    "name": "Living Room",
+    "description": "Main living room lights group"
+}
+
+### Example responses:
+
+# GET Response (200)
+# {
+#   "message": "Found 2 group(s)",
+#   "success": true,
+#   "data": {
+#     "count": 2,
+#     "groups": [
+#       {
+#         "id": "living-room",
+#         "name": "Living Room",
+#         "description": "Main living room lights",
+#         "parentGroups": [],
+#         "childGroups": ["corner-lights"],
+#         "bulbs": ["192.168.1.100", "192.168.1.101"]
+#       },
+#       {
+#         "id": "bedroom",
+#         "name": "Bedroom",
+#         "description": "Master bedroom lights",
+#         "parentGroups": [],
+#         "childGroups": [],
+#         "bulbs": ["192.168.1.102"]
+#       }
+#     ]
+#   }
+# }
+
+# POST Response (201)
+# {
+#   "message": "Group created successfully",
+#   "success": true,
+#   "data": {
+#     "id": "living-room",
+#     "name": "Living Room",
+#     "description": "Main living room lights group",
+#     "parentGroups": [],
+#     "childGroups": [],
+#     "bulbs": []
+#   }
+# }
+
+# Error Response (400)
+# {
+#   "message": "Group ID and name are required",
+#   "success": false
+# }
+
+# Error Response (500)
+# {
+#   "message": "Failed to create group",
+#   "success": false,
+#   "error": "Internal server error"
+# }

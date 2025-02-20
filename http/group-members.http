@@ -1,0 +1,110 @@
+@baseUrl = http://localhost:3000/api
+@groupId = living-room
+
+### Get group members (bulbs and subgroups)
+GET {{baseUrl}}/groups/{{groupId}}/members
+Content-Type: application/json
+
+### Add a bulb to group
+POST {{baseUrl}}/groups/{{groupId}}/members
+Content-Type: application/json
+
+{
+    "type": "bulb",
+    "id": "192.168.1.100"
+}
+
+### Add a subgroup to group
+POST {{baseUrl}}/groups/{{groupId}}/members
+Content-Type: application/json
+
+{
+    "type": "group",
+    "id": "corner-lights"
+}
+
+### Remove a bulb from group
+DELETE {{baseUrl}}/groups/{{groupId}}/members
+Content-Type: application/json
+
+{
+    "type": "bulb",
+    "id": "192.168.1.100"
+}
+
+### Remove a subgroup from group
+DELETE {{baseUrl}}/groups/{{groupId}}/members
+Content-Type: application/json
+
+{
+    "type": "group",
+    "id": "corner-lights"
+}
+
+### Example responses:
+
+# GET Response (200)
+# {
+#   "message": "Group members retrieved successfully",
+#   "success": true,
+#   "data": {
+#     "bulbs": [
+#       {
+#         "ip": "192.168.1.100",
+#         "name": "Living Room Light 1",
+#         "state": {
+#           "isOn": true,
+#           "brightness": 100,
+#           "rgb": [255, 255, 255]
+#         },
+#         "features": {
+#           "brightness": true,
+#           "color": true,
+#           "color_tmp": true,
+#           "effect": true
+#         }
+#       }
+#     ],
+#     "childGroups": [
+#       {
+#         "id": "corner-lights",
+#         "name": "Corner Lights",
+#         "description": "Corner accent lights",
+#         "parentGroups": ["living-room"],
+#         "childGroups": [],
+#         "bulbs": ["192.168.1.102"]
+#       }
+#     ]
+#   }
+# }
+
+# POST Response (200)
+# {
+#   "message": "bulb added to group successfully",
+#   "success": true
+# }
+
+# DELETE Response (200)
+# {
+#   "message": "group removed from group successfully",
+#   "success": true
+# }
+
+# Error Response (400)
+# {
+#   "message": "Member type and ID are required",
+#   "success": false
+# }
+
+# Error Response (404)
+# {
+#   "message": "Group not found",
+#   "success": false
+# }
+
+# Error Response (500)
+# {
+#   "message": "Failed to add member to group",
+#   "success": false,
+#   "error": "Internal server error"
+# }

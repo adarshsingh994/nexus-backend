@@ -7,15 +7,262 @@ import {
   SystemError,
   ErrorCode
 } from '../errors/lightControlErrors';
-import { BulbInfo, LightResponse } from '../types/bulb';
+import { BulbInfo, LightGroup, LightResponse } from '../types/bulb';
 
 export class LightsService {
   private static instance: LightsService;
   private bulbs: BulbInfo[] = [];
+  private groups: Map<string, LightGroup> = new Map();
   private processManager: ProcessManager;
   
   private constructor() {
     this.processManager = ProcessManager.getInstance();
+  }
+
+  // Group Management Methods
+  createGroup(id: string, name: string, description?: string): LightGroup {
+    if (this.groups.has(id)) {
+      throw new InvalidInputError(`Group with ID ${id} already exists`);
+    }
+
+    const group: LightGroup = {
+      id,
+      name,
+      description,
+      parentGroups: new Set(),
+      childGroups: new Set(),
+      bulbs: new Set()
+    };
+
+    this.groups.set(id, group);
+    return group;
+  }
+
+  getGroup(groupId: string): LightGroup {
+    const group = this.groups.get(groupId);
+    if (!group) {
+      throw new InvalidInputError(`Group ${groupId} not found`);
+    }
+    return group;
+  }
+
+  getAllGroups(): LightGroup[] {
+    return Array.from(this.groups.values());
+  }
+
+  addBulbToGroup(groupId: string, bulbIp: string): void {
+    const group = this.getGroup(groupId);
+    const bulb = this.bulbs.find(b => b.ip === bulbIp);
+    if (!bulb) {
+      throw new InvalidInputError(`Bulb with IP ${bulbIp} not found`);
+    }
+    group.bulbs.add(bulbIp);
+  }
+
+  removeBulbFromGroup(groupId: string, bulbIp: string): void {
+    const group = this.getGroup(groupId);
+    group.bulbs.delete(bulbIp);
+  }
+
+  addChildGroup(parentId: string, childId: string): void {
+    const parent = this.getGroup(parentId);
+    const child = this.getGroup(childId);
+
+    // Check for circular dependency
+    if (this.isGroupInHierarchy(childId, parentId)) {
+      throw new InvalidInputError('Circular group dependency detected');
+    }
+
+    parent.childGroups.add(childId);
+    child.parentGroups.add(parentId);
+  }
+
+  removeChildGroup(parentId: string, childId: string): void {
+    const parent = this.getGroup(parentId);
+    const child = this.getGroup(childId);
+
+    parent.childGroups.delete(childId);
+    child.parentGroups.delete(parentId);
+  }
+
+  removeAllRelationships(groupId: string): void {
+    const group = this.getGroup(groupId);
+    
+    // Remove all parent relationships
+    for (const parentId of group.parentGroups) {
+      const parent = this.groups.get(parentId);
+      if (parent) {
+        parent.childGroups.delete(groupId);
+      }
+    }
+
+    // Remove all child relationships
+    for (const childId of group.childGroups) {
+      const child = this.groups.get(childId);
+      if (child) {
+        child.parentGroups.delete(groupId);
+      }
+    }
+
+    // Remove the group itself
+    this.groups.delete(groupId);
+  }
+
+  private isGroupInHierarchy(groupId: string, targetId: string): boolean {
+    const group = this.groups.get(groupId);
+    if (!group) return false;
+    if (group.childGroups.has(targetId)) return true;
+
+    for (const childId of group.childGroups) {
+      if (this.isGroupInHierarchy(childId, targetId)) return true;
+    }
+    return false;
+  }
+
+  getAllGroupBulbs(groupId: string): BulbInfo[] {
+    const group = this.getGroup(groupId);
+    const bulbIps = new Set<string>();
+    
+    const processGroup = (gId: string): void => {
+      const g = this.groups.get(gId);
+      if (!g) return;
+      
+      g.bulbs.forEach((ip: string) => bulbIps.add(ip));
+      g.childGroups.forEach((childId: string) => processGroup(childId));
+    };
+    
+    // Process the initial group
+    processGroup(groupId);
+    
+    // Return BulbInfo objects for all collected IPs
+    return this.bulbs.filter(bulb => bulbIps.has(bulb.ip));
+  }
+
+  getParentGroups(groupId: string): LightGroup[] {
+    const group = this.getGroup(groupId);
+    const parentGroups: LightGroup[] = [];
+    
+    const processParents = (g: LightGroup): void => {
+      g.parentGroups.forEach((parentId: string) => {
+        const parent = this.groups.get(parentId);
+        if (parent) {
+          parentGroups.push(parent);
+          processParents(parent);
+        }
+      });
+    };
+    
+    processParents(group);
+    return parentGroups;
+  }
+
+  // Group-based Light Control Methods
+  async turnOnGroup(groupId: string): Promise<LightResponse> {
+    const bulbs = this.getAllGroupBulbs(groupId);
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: bulbs.map(bulb => bulb.ip)
+        };
+        const response = await this.processManager.executeScript('turn_on_lights', [JSON.stringify(request)]);
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to turn on group lights');
+      }
+    });
+  }
+
+  async turnOffGroup(groupId: string): Promise<LightResponse> {
+    const bulbs = this.getAllGroupBulbs(groupId);
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: bulbs.map(bulb => bulb.ip)
+        };
+        const response = await this.processManager.executeScript('turn_off_lights', [JSON.stringify(request)]);
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to turn off group lights');
+      }
+    });
+  }
+
+  async setGroupWarmWhite(groupId: string, intensity: number): Promise<LightResponse> {
+    this.validateIntensity(intensity);
+    const bulbs = this.getAllGroupBulbs(groupId);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: bulbs.map(bulb => bulb.ip),
+          intensity
+        };
+        const response = await this.processManager.executeScript(
+          'set_lights_warm_white',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set group warm white');
+      }
+    });
+  }
+
+  async setGroupColdWhite(groupId: string, intensity: number): Promise<LightResponse> {
+    this.validateIntensity(intensity);
+    const bulbs = this.getAllGroupBulbs(groupId);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: bulbs.map(bulb => bulb.ip),
+          intensity
+        };
+        const response = await this.processManager.executeScript(
+          'set_lights_cold_white',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set group cold white');
+      }
+    });
+  }
+
+  async setGroupColor(groupId: string, color: number[]): Promise<LightResponse> {
+    this.validateColor(color);
+    const bulbs = this.getAllGroupBulbs(groupId);
+    
+    return this.executeWithTimeout(async () => {
+      try {
+        const request = {
+          ips: bulbs.map(bulb => bulb.ip),
+          color
+        };
+        const response = await this.processManager.executeScript(
+          'set_lights_color',
+          [JSON.stringify(request)]
+        );
+        return this.parseResponse(response);
+      } catch (error) {
+        if (error instanceof LightControlError) {
+          throw error;
+        }
+        throw new SystemError('Failed to set group color');
+      }
+    });
   }
 
   static getInstance(): LightsService {
@@ -208,13 +455,3 @@ export class LightsService {
   }
 }
 
-// Handle cleanup on process termination
-process.on('SIGINT', () => {
-  console.log('Cleaning up LightsService...')
-  LightsService.getInstance().cleanup()
-});
-
-process.on('SIGTERM', () => {
-  console.log('Cleaning up LightsService...')
-  LightsService.getInstance().cleanup()
-});

@@ -1,0 +1,87 @@
+@baseUrl = http://localhost:3000/api
+@groupId = living-room
+
+### Get group details
+GET {{baseUrl}}/groups/{{groupId}}
+Content-Type: application/json
+
+### Update group properties
+PUT {{baseUrl}}/groups/{{groupId}}
+Content-Type: application/json
+
+{
+    "name": "Living Room Updated",
+    "description": "Main living room lights group"
+}
+
+### Delete group and its relationships
+DELETE {{baseUrl}}/groups/{{groupId}}
+Content-Type: application/json
+
+### Example responses:
+
+# GET Response (200)
+# {
+#   "message": "Group details retrieved successfully",
+#   "success": true,
+#   "data": {
+#     "group": {
+#       "id": "living-room",
+#       "name": "Living Room",
+#       "description": "Main living room lights",
+#       "parentGroups": [],
+#       "childGroups": ["corner-lights"],
+#       "bulbs": ["192.168.1.100", "192.168.1.101"]
+#     },
+#     "bulbs": [
+#       {
+#         "ip": "192.168.1.100",
+#         "name": "Living Room Light 1",
+#         "state": {
+#           "isOn": true,
+#           "brightness": 100,
+#           "rgb": [255, 255, 255]
+#         },
+#         "features": {
+#           "brightness": true,
+#           "color": true,
+#           "color_tmp": true,
+#           "effect": true
+#         }
+#       }
+#     ]
+#   }
+# }
+
+# PUT Response (200)
+# {
+#   "message": "Group updated successfully",
+#   "success": true,
+#   "data": {
+#     "id": "living-room",
+#     "name": "Living Room Updated",
+#     "description": "Main living room lights group",
+#     "parentGroups": [],
+#     "childGroups": [],
+#     "bulbs": []
+#   }
+# }
+
+# DELETE Response (200)
+# {
+#   "message": "Group deleted successfully",
+#   "success": true
+# }
+
+# Error Response (404)
+# {
+#   "message": "Group not found",
+#   "success": false
+# }
+
+# Error Response (500)
+# {
+#   "message": "Failed to get group details",
+#   "success": false,
+#   "error": "Internal server error"
+# }

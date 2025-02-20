@@ -29,6 +29,15 @@ export interface BulbInfo {
     error?: string;
 }
 
+export interface LightGroup {
+    id: string;
+    name: string;
+    description?: string;
+    parentGroups: Set<string>;  // IDs of groups this group belongs to
+    childGroups: Set<string>;   // IDs of groups that belong to this group
+    bulbs: Set<string>;        // IPs of bulbs directly in this group
+}
+
 export interface LightResponse {
     message: string;
     overall_success?: boolean;

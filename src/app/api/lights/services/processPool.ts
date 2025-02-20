@@ -200,15 +200,3 @@ export class ProcessPool {
     this.processQueue = [];
   }
 }
-
-// Import the global instance instead of creating cleanup handlers here
-import { processPool } from './globalInstances';
-
-// Handle cleanup on process termination
-process.on('SIGINT', () => {
-  processPool.cleanup();
-});
-
-process.on('SIGTERM', () => {
-  processPool.cleanup();
-});

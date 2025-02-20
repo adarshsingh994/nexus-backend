@@ -1,7 +1,8 @@
 import { ChildProcess, spawn } from 'child_process';
 import { join } from 'path';
 import { SystemError } from '../errors/lightControlErrors';
-import { processPool, environmentManager } from './globalInstances';
+import { ProcessPool } from './processPool';
+import { EnvironmentManager } from './environmentManager';
 
 interface ProcessMetrics {
   pid: number;
@@ -19,9 +20,13 @@ export class ProcessManager {
   private static instance: ProcessManager;
   private processes: Map<string, ProcessInfo> = new Map();
   private metricsInterval: NodeJS.Timeout | null = null;
+  private pool: ProcessPool;
+  private envManager: EnvironmentManager;
   
   private constructor() {
     console.log('Creating new instance of ProcessManager');
+    this.pool = ProcessPool.getInstance();
+    this.envManager = EnvironmentManager.getInstance();
     this.startMetricsCollection();
   }
 
@@ -91,16 +96,16 @@ export class ProcessManager {
     try {
       // Ensure Python environment is initialized
       console.log('Initialising environment manager')
-      await environmentManager.initialize();
+      await this.envManager.initialize();
       
       // Get validated Python path
-      const pythonPath = environmentManager.getPythonPath();
+      const pythonPath = this.envManager.getPythonPath();
       
       // Build script path
       const scriptPath = join('python_scripts', `${scriptName}.py`);
       
       // Use ProcessPool for execution
-      const result = await processPool.executeScript(scriptName, args);
+      const result = await this.pool.executeScript(scriptName, args);
       return result;
     } catch (error) {
       if (error instanceof Error) {
@@ -123,15 +128,3 @@ export class ProcessManager {
     }
   }
 }
-
-// Import the global instance instead of creating cleanup handlers here
-import { processManager } from './globalInstances';
-
-// Handle cleanup on process termination
-process.on('SIGINT', () => {
-  processManager.cleanup();
-});
-
-process.on('SIGTERM', () => {
-  processManager.cleanup();
-});

@@ -1,0 +1,111 @@
+@baseUrl = http://localhost:3000/api
+@groupId = living-room
+
+### Turn on all lights in group (including subgroups)
+POST {{baseUrl}}/groups/{{groupId}}/actions
+Content-Type: application/json
+
+{
+    "action": "turnOn"
+}
+
+### Turn off all lights in group
+POST {{baseUrl}}/groups/{{groupId}}/actions
+Content-Type: application/json
+
+{
+    "action": "turnOff"
+}
+
+### Set warm white for all lights in group
+POST {{baseUrl}}/groups/{{groupId}}/actions
+Content-Type: application/json
+
+{
+    "action": "setWarmWhite",
+    "params": {
+        "intensity": 128
+    }
+}
+
+### Set cold white for all lights in group
+POST {{baseUrl}}/groups/{{groupId}}/actions
+Content-Type: application/json
+
+{
+    "action": "setColdWhite",
+    "params": {
+        "intensity": 200
+    }
+}
+
+### Set color for all lights in group
+POST {{baseUrl}}/groups/{{groupId}}/actions
+Content-Type: application/json
+
+{
+    "action": "setColor",
+    "params": {
+        "color": [255, 0, 0]
+    }
+}
+
+### Example responses:
+
+# Success Response (200)
+# {
+#   "message": "All lights in group turned on successfully",
+#   "overall_success": true,
+#   "results": {
+#     "192.168.1.100": {
+#       "success": true,
+#       "message": "Light turned on"
+#     },
+#     "192.168.1.101": {
+#       "success": true,
+#       "message": "Light turned on"
+#     }
+#   }
+# }
+
+# Partial Success Response (207)
+# {
+#   "message": "Some lights in group failed to turn on",
+#   "overall_success": false,
+#   "results": {
+#     "192.168.1.100": {
+#       "success": true,
+#       "message": "Light turned on"
+#     },
+#     "192.168.1.101": {
+#       "success": false,
+#       "message": "Connection failed"
+#     }
+#   }
+# }
+
+# Error Response (400)
+# {
+#   "message": "Action is required",
+#   "code": "INVALID_INPUT"
+# }
+
+# Error Response (404)
+# {
+#   "message": "Group not found",
+#   "code": "NOT_FOUND"
+# }
+
+# Error Response (502)
+# {
+#   "message": "Failed to control lights",
+#   "code": "LIGHT_CONTROL_ERROR",
+#   "retriable": true
+# }
+
+# Error Response (504)
+# {
+#   "message": "Operation timed out",
+#   "code": "PROCESS_TIMEOUT",
+#   "retriable": true
+# }
