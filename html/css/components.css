@@ -38,6 +38,17 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Add a class for scroll state */
+.is-scrolling .status-indicator__dot::after,
+.is-scrolling .power-controls::after,
+.is-scrolling .header::after {
+    animation-play-state: paused;
+}
+
+.header {
+    will-change: opacity;
+}
+
 .header::after {
     content: '';
     position: absolute;
@@ -46,7 +57,7 @@
     transform: translateX(-50%);
     width: 80px;
     height: 3px;
-    background: linear-gradient(90deg, 
+    background: linear-gradient(90deg,
         transparent,
         var(--primary-light),
         var(--primary),
@@ -55,11 +66,19 @@
     );
     border-radius: 1.5px;
     animation: glow 3s ease-in-out infinite;
+    will-change: opacity;
 }
 
 @keyframes glow {
-    0%, 100% { opacity: 0.5; filter: blur(0px); }
-    50% { opacity: 1; filter: blur(1px); }
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header::after {
+        animation: none;
+        opacity: 0.7;
+    }
 }
 
 .header__subtitle {
@@ -81,18 +100,34 @@
     overflow: hidden;
 }
 
+.power-controls {
+    will-change: transform;
+}
+
 .power-controls::after {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: shimmer 3s infinite;
     transform: translateX(-100%);
+    will-change: transform;
+    animation: none; /* Disable continuous animation */
+}
+
+/* Only animate on hover */
+.power-controls:hover::after {
+    animation: shimmer 1.5s ease-out;
 }
 
 @keyframes shimmer {
     0% { transform: translateX(-100%); }
-    20%, 100% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .power-controls:hover::after {
+        animation: none;
+    }
 }
 
 .power-controls--single {
@@ -293,6 +328,10 @@
     position: relative;
 }
 
+.status-indicator__dot {
+    will-change: transform, opacity;
+}
+
 .status-indicator__dot::after {
     content: '';
     position: absolute;
@@ -301,12 +340,20 @@
     background: var(--primary-light);
     opacity: 0.2;
     animation: pulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform, opacity;
 }
 
 @keyframes pulse {
     0% { transform: scale(1); opacity: 0.2; }
-    50% { transform: scale(2); opacity: 0.1; }
+    50% { transform: scale(1.8); opacity: 0.1; }
     100% { transform: scale(1); opacity: 0.2; }
+}
+
+/* Add reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .status-indicator__dot::after {
+        animation: none;
+    }
 }
 
 .status-indicator__dot--offline {
