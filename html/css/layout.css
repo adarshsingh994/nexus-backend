@@ -17,7 +17,6 @@
 /* Responsive Layout */
 @media (max-width: 768px) and (orientation: portrait) {
     body {
-        padding: var(--space-sm);
         min-height: 100dvh;
         display: flex;
         align-items: flex-start;
@@ -28,10 +27,10 @@
     
     .container {
         padding: var(--space-md);
-        margin: var(--space-sm) 0;
-        width: calc(100% - var(--space-sm) * 2);
+        margin: 0;
+        width: 100%;
         max-width: 100%;
-        min-height: calc(100dvh - var(--space-xl));
+        min-height: 100dvh;
         overflow-y: auto;
         overflow-x: hidden;
         box-sizing: border-box;
@@ -61,7 +60,6 @@
 
 @media (max-width: 768px) and (orientation: landscape) {
     body {
-        padding: var(--space-sm);
         height: auto;
         min-height: 100dvh;
         background: var(--surface-dark);
@@ -70,11 +68,11 @@
     .container {
         padding: var(--space-md);
         height: auto;
-        min-height: calc(100dvh - var(--space-xl));
-        width: calc(100% - var(--space-sm) * 2);
+        min-height: 100dvh;
+        width: 100%;
         max-width: 100%;
         box-sizing: border-box;
-        margin: var(--space-sm) 0;
+        margin: 0;
     }
 
     /* Optimize for landscape view */
@@ -86,10 +84,6 @@
 }
 
 @media (max-width: 480px) {
-    body {
-        padding: var(--space-xs);
-    }
-
     .container {
         padding: var(--space-sm);
         border-radius: var(--radius-lg);
