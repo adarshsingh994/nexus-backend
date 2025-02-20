@@ -96,37 +96,54 @@
 
 /* Generic Button Styles */
 .button {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border-radius: var(--radius-md);
     font-size: var(--text-base);
     font-weight: 600;
     color: var(--text);
     background: var(--surface);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.75px;
     transition: var(--transition);
     width: 100%;
-    min-height: 3rem;
+    min-height: 3.2rem;
     touch-action: manipulation;
+    position: relative;
+    overflow: hidden;
 }
 
 .button:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     color: var(--primary);
+    box-shadow: var(--shadow-lg);
 }
 
 .button:hover i {
-    transform: scale(1.1);
+    transform: scale(1.15);
+    color: var(--primary);
 }
 
 .button:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-inset-sm);
+    transform: translateY(1px);
+    box-shadow: var(--shadow-inset-md);
+}
+
+.button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.button:hover::after {
+    transform: translateX(100%);
 }
 
 .button--active {
@@ -168,24 +185,44 @@
 .status-indicator {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: 0.6rem 1rem;
+    gap: var(--space-md);
+    padding: 0.8rem 1.2rem;
     background: var(--surface);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     transition: var(--transition);
+    position: relative;
+    overflow: hidden;
 }
 
 .status-indicator:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .status-indicator__dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--primary);
-    box-shadow: 0 0 6px var(--primary-light);
+    box-shadow: 0 0 8px var(--primary-light);
+    position: relative;
+}
+
+.status-indicator__dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    opacity: 0.2;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.5); opacity: 0.1; }
+    100% { transform: scale(1); opacity: 0.2; }
 }
 
 .status-indicator__dot--offline {
@@ -202,16 +239,35 @@
 /* Section */
 .section {
     background: var(--surface);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
     border: none;
     transition: var(--transition);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    overflow: hidden;
 }
 
 .section:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.section:hover::after {
+    opacity: 1;
 }
 
 .section__header {
@@ -299,35 +355,50 @@
 
 .slider {
     width: 100%;
-    height: 10px;
-    border-radius: 5px;
+    height: 12px;
+    border-radius: 6px;
     -webkit-appearance: none;
-    background: var(--surface);
-    margin: var(--space-sm) 0;
-    box-shadow: var(--shadow-inset-sm);
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    margin: var(--space-md) 0;
+    box-shadow: var(--shadow-inset-md);
     border: none;
     touch-action: manipulation;
+    position: relative;
+}
+
+.slider::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: var(--surface);
+    opacity: 0.85;
 }
 
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--surface);
     cursor: pointer;
-    border: none;
-    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--primary);
+    box-shadow: var(--shadow-md);
     transition: var(--transition);
+    position: relative;
+    z-index: 1;
 }
 
 .slider::-webkit-slider-thumb:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-md);
+    transform: scale(1.15);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
 }
 
 .slider::-webkit-slider-thumb:active {
-    box-shadow: var(--shadow-inset-sm);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-inset-md);
+    border-color: var(--primary-dark);
 }
 
 /* Button States */

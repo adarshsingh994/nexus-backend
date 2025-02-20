@@ -1,14 +1,14 @@
 :root {
-    --primary: #4A90E2;
-    --primary-dark: #357ABD;
-    --primary-light: #72AEF3;
-    --surface: #E0E5EC;
-    --surface-dark: #A3B1C6;
-    --text: #2D3436;
-    --text-light: #636E72;
-    --shadow-light: rgba(255, 255, 255, 0.7);
-    --shadow-dark: rgba(0, 0, 0, 0.08);
-    --transition: all 0.2s ease;
+    --primary: #2E7DDE;
+    --primary-dark: #1B6AD4;
+    --primary-light: #5B9BE6;
+    --surface: #E8EDF2;
+    --surface-dark: #B8C4D4;
+    --text: #1A2027;
+    --text-light: #4A5660;
+    --shadow-light: rgba(255, 255, 255, 0.9);
+    --shadow-dark: rgba(0, 0, 0, 0.12);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Spacing - Reduced for more compact layout */
     --space-xs: 0.25rem;
@@ -32,13 +32,13 @@
     --text-2xl: 1.4rem;
     --text-3xl: 1.8rem;
     
-    /* Shadows - Reduced intensity for subtler effect */
-    --shadow-sm: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-    --shadow-md: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-    --shadow-lg: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
-    --shadow-xl: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
-    --shadow-inset-sm: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
-    --shadow-inset-md: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    /* Shadows - Enhanced for better depth */
+    --shadow-sm: 3px 3px 6px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
+    --shadow-md: 5px 5px 10px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
+    --shadow-lg: 8px 8px 16px var(--shadow-dark), -4px -4px 12px var(--shadow-light);
+    --shadow-xl: 12px 12px 24px var(--shadow-dark), -6px -6px 16px var(--shadow-light);
+    --shadow-inset-sm: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+    --shadow-inset-md: inset 3px 3px 7px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
 }
 
 @property --primary {
