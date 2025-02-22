@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
-const ALLOWED_HEADERS = ['Content-Type', 'Authorization'];
+const ALLOWED_HEADERS = ['Content-Type', 'Authorization', 'Accept'];
 
 /**
  * Adds CORS headers to the response
