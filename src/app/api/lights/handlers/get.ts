@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import {
   LightControlError,
   InvalidInputError,
@@ -6,12 +6,7 @@ import {
   SystemError
 } from '../errors/lightControlErrors';
 import { lightsService, environmentManager } from '../services/globalInstances';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+import { corsResponse } from '../../shared/cors';
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,7 +26,7 @@ export async function GET(req: NextRequest) {
       case 'on':
         console.log('Turning on lights');
         response = await lightsService.turnOnLights();
-        return NextResponse.json(
+        return corsResponse(
           {
             message: response.overall_success
               ? 'All lights turned on successfully'
@@ -40,15 +35,14 @@ export async function GET(req: NextRequest) {
             results: response.results
           },
           {
-            status: response.overall_success ? 200 : 207,
-            headers: corsHeaders
+            status: response.overall_success ? 200 : 207
           }
         );
 
       case 'off':
         console.log('Turning off lights');
         response = await lightsService.turnOffLights();
-        return NextResponse.json(
+        return corsResponse(
           {
             message: response.overall_success
               ? 'All lights turned off successfully'
@@ -57,15 +51,14 @@ export async function GET(req: NextRequest) {
             results: response.results
           },
           {
-            status: response.overall_success ? 200 : 207,
-            headers: corsHeaders
+            status: response.overall_success ? 200 : 207
           }
         );
 
       case 'warm_white':
         console.log('Setting light warm white:', intensity);
         response = await lightsService.setWarmWhite(intensity);
-        return NextResponse.json(
+        return corsResponse(
           {
             message: response.overall_success
               ? `All lights set to warm white with intensity ${intensity} successfully`
@@ -74,15 +67,14 @@ export async function GET(req: NextRequest) {
             results: response.results
           },
           {
-            status: response.overall_success ? 200 : 207,
-            headers: corsHeaders
+            status: response.overall_success ? 200 : 207
           }
         );
 
       case 'cold_white':
         console.log('Setting light cold white:', intensity);
         response = await lightsService.setColdWhite(intensity);
-        return NextResponse.json(
+        return corsResponse(
           {
             message: response.overall_success
               ? `All lights set to cold white with intensity ${intensity} successfully`
@@ -91,15 +83,14 @@ export async function GET(req: NextRequest) {
             results: response.results
           },
           {
-            status: response.overall_success ? 200 : 207,
-            headers: corsHeaders
+            status: response.overall_success ? 200 : 207
           }
         );
 
       case 'color':
         console.log('Changing light color:', color);
         response = await lightsService.setColor(color!);
-        return NextResponse.json(
+        return corsResponse(
           {
             message: response.overall_success
               ? `All lights set to RGB color (${color?.join(', ')}) successfully`
@@ -108,8 +99,7 @@ export async function GET(req: NextRequest) {
             results: response.results
           },
           {
-            status: response.overall_success ? 200 : 207,
-            headers: corsHeaders
+            status: response.overall_success ? 200 : 207
           }
         );
 
@@ -122,7 +112,7 @@ export async function GET(req: NextRequest) {
           }
         }));
 
-        return NextResponse.json(
+        return corsResponse(
           {
             message: `Found ${bulbs.length} light(s) on the network`,
             success: true,
@@ -132,59 +122,58 @@ export async function GET(req: NextRequest) {
             }
           },
           {
-            status: 200,
-            headers: corsHeaders
+            status: 200
           }
-        )
+        );
     }
   } catch (error) {
     console.error('Error in lights API:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         { message: error.message, code: error.code },
-        { status: 400, headers: corsHeaders }
+        { status: 400 }
       );
     }
 
     if (error instanceof ProcessTimeoutError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: 'Operation timed out',
           code: error.code,
           retriable: true
         },
-        { status: 504, headers: corsHeaders }
+        { status: 504 }
       );
     }
 
     if (error instanceof LightControlError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           code: error.code,
           retriable: error.retriable
         },
-        { status: 502, headers: corsHeaders }
+        { status: 502 }
       );
     }
 
     if (error instanceof SystemError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: 'Internal system error',
           code: error.code
         },
-        { status: 500, headers: corsHeaders }
+        { status: 500 }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'An unexpected error occurred',
         code: 'UNKNOWN_ERROR'
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

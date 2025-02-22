@@ -1,11 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { lightsService } from '../../../lights/services/globalInstances';
-import { corsHeaders } from '../../../shared/config';
-import {
-  LightControlError,
-  InvalidInputError,
-  SystemError
-} from '../../../lights/errors/lightControlErrors';
+import { corsResponse, handleCorsPreflightRequest } from '../../../shared/cors';
+import { InvalidInputError } from '../../../lights/errors/lightControlErrors';
 import { BulbInfo } from '../../../lights/types/bulb';
 
 interface AddMemberRequest {
@@ -24,7 +20,7 @@ export async function GET(
     const bulbs = lightsService.getAllGroupBulbs(groupId);
     const childGroups = Array.from(group.childGroups).map(id => lightsService.getGroup(id));
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Group members retrieved successfully',
         success: true,
@@ -40,35 +36,32 @@ export async function GET(
         }
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error getting group members:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 404,
-          headers: corsHeaders
+          status: 404
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to get group members',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
@@ -97,41 +90,38 @@ export async function POST(
         throw new InvalidInputError('Invalid member type');
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: `${data.type} added to group successfully`,
         success: true
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error adding group member:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 400,
-          headers: corsHeaders
+          status: 400
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to add member to group',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
@@ -160,52 +150,43 @@ export async function DELETE(
         throw new InvalidInputError('Invalid member type');
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: `${data.type} removed from group successfully`,
         success: true
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error removing group member:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 400,
-          headers: corsHeaders
+          status: 400
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to remove member from group',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
 }
 
 export async function OPTIONS() {
-  return NextResponse.json(null, {
-    status: 204,
-    headers: {
-      ...corsHeaders,
-      'Allow': 'GET, POST, DELETE, OPTIONS'
-    }
-  });
+  return handleCorsPreflightRequest();
 }

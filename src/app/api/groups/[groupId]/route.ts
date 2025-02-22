@@ -1,11 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { lightsService } from '../../lights/services/globalInstances';
-import { corsHeaders } from '../../shared/config';
-import {
-  LightControlError,
-  InvalidInputError,
-  SystemError
-} from '../../lights/errors/lightControlErrors';
+import { corsResponse, handleCorsPreflightRequest } from '../../shared/cors';
+import { InvalidInputError } from '../../lights/errors/lightControlErrors';
 import { BulbInfo } from '../../lights/types/bulb';
 
 export async function GET(
@@ -18,7 +14,7 @@ export async function GET(
     const group = lightsService.getGroup(groupId);
     const bulbs = lightsService.getAllGroupBulbs(groupId);
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Group details retrieved successfully',
         success: true,
@@ -34,35 +30,32 @@ export async function GET(
         }
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error getting group:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 404,
-          headers: corsHeaders
+          status: 404
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to get group details',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
@@ -87,42 +80,39 @@ export async function PUT(
       group.description = data.description;
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Group updated successfully',
         success: true,
         data: group
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error updating group:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 404,
-          headers: corsHeaders
+          status: 404
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to update group',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
@@ -141,52 +131,43 @@ export async function DELETE(
     // Remove all relationships
     lightsService.removeAllRelationships(groupId);
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Group deleted successfully',
         success: true
       },
       {
-        status: 200,
-        headers: corsHeaders
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error deleting group:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           success: false
         },
         {
-          status: 404,
-          headers: corsHeaders
+          status: 404
         }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'Failed to delete group',
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       {
-        status: 500,
-        headers: corsHeaders
+        status: 500
       }
     );
   }
 }
 
 export async function OPTIONS() {
-  return NextResponse.json(null, {
-    status: 204,
-    headers: {
-      ...corsHeaders,
-      'Allow': 'GET, PUT, DELETE, OPTIONS'
-    }
-  });
+  return handleCorsPreflightRequest();
 }

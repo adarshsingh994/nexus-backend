@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { lightsService } from '../../../lights/services/globalInstances';
-import { corsHeaders } from '../../../shared/config';
+import { corsResponse, handleCorsPreflightRequest } from '../../../shared/cors';
 import {
   LightControlError,
   InvalidInputError,
@@ -58,75 +58,68 @@ export async function POST(
         throw new InvalidInputError(`Unsupported action: ${data.action}`);
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: response.message,
         overall_success: response.overall_success,
         results: response.results
       },
       {
-        status: response.overall_success ? 200 : 207,
-        headers: corsHeaders
+        status: response.overall_success ? 200 : 207
       }
     );
   } catch (error) {
     console.error('Error in group action:', error);
 
     if (error instanceof InvalidInputError) {
-      return NextResponse.json(
+      return corsResponse(
         { message: error.message, code: error.code },
-        { status: 400, headers: corsHeaders }
+        { status: 400 }
       );
     }
 
     if (error instanceof ProcessTimeoutError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: 'Operation timed out',
           code: error.code,
           retriable: true
         },
-        { status: 504, headers: corsHeaders }
+        { status: 504 }
       );
     }
 
     if (error instanceof LightControlError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: error.message,
           code: error.code,
           retriable: error.retriable
         },
-        { status: 502, headers: corsHeaders }
+        { status: 502 }
       );
     }
 
     if (error instanceof SystemError) {
-      return NextResponse.json(
+      return corsResponse(
         {
           message: 'Internal system error',
           code: error.code
         },
-        { status: 500, headers: corsHeaders }
+        { status: 500 }
       );
     }
 
-    return NextResponse.json(
+    return corsResponse(
       {
         message: 'An unexpected error occurred',
         code: 'UNKNOWN_ERROR'
       },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }
 
 export async function OPTIONS() {
-  return NextResponse.json(null, {
-    status: 204,
-    headers: {
-      ...corsHeaders,
-      'Allow': 'POST, OPTIONS'
-    }
-  });
+  return handleCorsPreflightRequest();
 }

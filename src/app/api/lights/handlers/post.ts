@@ -1,17 +1,8 @@
-import { NextResponse } from 'next/server'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-}
+import { corsResponse } from '../../shared/cors';
 
 export async function POST() {
-  return NextResponse.json(
+  return corsResponse(
     { message: 'This is a post request' },
-    { 
-      status: 200,
-      headers: corsHeaders
-    }
-  )
+    { status: 200 }
+  );
 }
