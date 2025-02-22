@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
 
     const group = lightsService.getGroup(groupId);
     const bulbs = lightsService.getAllGroupBulbs(groupId);
@@ -72,7 +72,7 @@ export async function POST(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
     const data = await request.json() as AddMemberRequest;
 
     if (!data.type || !data.id) {
@@ -132,7 +132,7 @@ export async function DELETE(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
     const data = await request.json() as AddMemberRequest;
 
     if (!data.type || !data.id) {

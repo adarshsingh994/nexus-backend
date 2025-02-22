@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
 
     const group = lightsService.getGroup(groupId);
     const bulbs = lightsService.getAllGroupBulbs(groupId);
@@ -66,7 +66,7 @@ export async function PUT(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
     const data = await request.json();
 
     // Ensure group exists
@@ -123,7 +123,7 @@ export async function DELETE(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
 
     // This will throw if group doesn't exist
     lightsService.getGroup(groupId);

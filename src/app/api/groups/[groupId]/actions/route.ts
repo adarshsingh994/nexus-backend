@@ -21,7 +21,7 @@ export async function POST(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
     const data = await request.json() as GroupActionRequest;
 
     if (!data.action) {
