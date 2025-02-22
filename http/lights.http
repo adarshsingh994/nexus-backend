@@ -1,0 +1,135 @@
+@baseUrl = http://localhost:3000/api
+
+### Get all lights
+GET {{baseUrl}}/lights
+Content-Type: application/json
+
+### Get only ungrouped lights
+GET {{baseUrl}}/lights?grouped=false
+Content-Type: application/json
+
+### Turn on all lights
+GET {{baseUrl}}/lights?action=on
+Content-Type: application/json
+
+### Turn off all lights
+GET {{baseUrl}}/lights?action=off
+Content-Type: application/json
+
+### Set warm white for all lights
+GET {{baseUrl}}/lights?action=warm_white&intensity=128
+Content-Type: application/json
+
+### Set cold white for all lights
+GET {{baseUrl}}/lights?action=cold_white&intensity=200
+Content-Type: application/json
+
+### Set color for all lights
+GET {{baseUrl}}/lights?action=color&color=255,0,0
+Content-Type: application/json
+
+### Example responses:
+
+# Get All Lights Response (200)
+# {
+#   "message": "Found 3 light(s) on the network",
+#   "success": true,
+#   "data": {
+#     "count": 3,
+#     "bulbs": [
+#       {
+#         "ip": "192.168.1.100",
+#         "name": "Living Room Light 1",
+#         "state": {
+#           "isOn": true,
+#           "brightness": 100,
+#           "rgb": [255, 255, 255]
+#         },
+#         "features": {
+#           "brightness": true,
+#           "color": true,
+#           "color_tmp": true,
+#           "effect": true
+#         }
+#       }
+#     ]
+#   }
+# }
+
+# Get Ungrouped Lights Response (200)
+# {
+#   "message": "Found 1 ungrouped light(s)",
+#   "success": true,
+#   "data": {
+#     "count": 1,
+#     "bulbs": [
+#       {
+#         "ip": "192.168.1.103",
+#         "name": "New Light",
+#         "state": {
+#           "isOn": false,
+#           "brightness": 0,
+#           "rgb": null
+#         },
+#         "features": {
+#           "brightness": true,
+#           "color": true,
+#           "color_tmp": true,
+#           "effect": true
+#         }
+#       }
+#     ]
+#   }
+# }
+
+# Action Success Response (200)
+# {
+#   "message": "All lights turned on successfully",
+#   "overall_success": true,
+#   "results": {
+#     "192.168.1.100": {
+#       "success": true,
+#       "message": "Light turned on"
+#     },
+#     "192.168.1.101": {
+#       "success": true,
+#       "message": "Light turned on"
+#     }
+#   }
+# }
+
+# Action Partial Success Response (207)
+# {
+#   "message": "Some lights failed to turn on",
+#   "overall_success": false,
+#   "results": {
+#     "192.168.1.100": {
+#       "success": true,
+#       "message": "Light turned on"
+#     },
+#     "192.168.1.101": {
+#       "success": false,
+#       "message": "Connection failed"
+#     }
+#   }
+# }
+
+# Error Response (400)
+# {
+#   "message": "Invalid intensity value",
+#   "code": "INVALID_INPUT"
+# }
+
+# Error Response (502)
+# {
+#   "message": "Failed to control lights",
+#   "code": "LIGHT_CONTROL_ERROR",
+#   "retriable": true
+# }
+
+# Error Response (504)
+# {
+#   "message": "Operation timed out",
+#   "code": "PROCESS_TIMEOUT",
+#   "retriable": true
+# }

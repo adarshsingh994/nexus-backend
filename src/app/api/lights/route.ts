@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const action = req.nextUrl.searchParams.get('action');
     const color = req.nextUrl.searchParams.get('color')?.split(',').map(Number);
     const intensity = Number(req.nextUrl.searchParams.get('intensity'));
+    const grouped = req.nextUrl.searchParams.get('grouped') !== 'false';
 
     console.log('Initializing environment...');
     await environmentManager.initialize();
@@ -21,6 +22,42 @@ export async function GET(req: NextRequest) {
 
     console.log('Action received:', action);
     console.log('Current bulbs:', lightsService.getBulbs());
+
+    // Return ungrouped lights if grouped=false
+    if (!grouped && !action) {
+      const allBulbs = lightsService.getBulbs();
+      const allGroups = lightsService.getAllGroups();
+      
+      // Get all bulb IPs that are in any group
+      const groupedBulbIps = new Set<string>();
+      allGroups.forEach(group => {
+        group.bulbs.forEach(ip => groupedBulbIps.add(ip));
+      });
+
+      // Filter out bulbs that are in groups
+      const ungroupedBulbs = allBulbs.filter(bulb => !groupedBulbIps.has(bulb.ip))
+        .map(bulb => ({
+          ...bulb,
+          state: {
+            ...bulb.state,
+            rgb: bulb.state.rgb ? Array.from(bulb.state.rgb) : undefined
+          }
+        }));
+
+      return corsResponse(
+        {
+          message: `Found ${ungroupedBulbs.length} ungrouped light(s)`,
+          success: true,
+          data: {
+            count: ungroupedBulbs.length,
+            bulbs: ungroupedBulbs
+          }
+        },
+        {
+          status: 200
+        }
+      );
+    }
 
     switch (action) {
       case 'on':
