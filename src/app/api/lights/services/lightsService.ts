@@ -7,7 +7,7 @@ import {
   SystemError,
   ErrorCode
 } from '../errors/lightControlErrors';
-import { BulbInfo, LightGroup, LightResponse } from '../types/bulb';
+import { BulbInfo, BulbState, LightGroup, LightResponse } from '../types/bulb';
 
 export class LightsService {
   private static instance: LightsService;
@@ -120,7 +120,8 @@ export class LightsService {
   }
 
   getAllGroupBulbs(groupId: string): BulbInfo[] {
-    const group = this.getGroup(groupId);
+    // Verify the group exists (will throw if not found)
+    this.getGroup(groupId);
     const bulbIps = new Set<string>();
     
     const processGroup = (gId: string): void => {
@@ -165,7 +166,18 @@ export class LightsService {
           ips: bulbs.map(bulb => bulb.ip)
         };
         const response = await this.processManager.executeScript('turn_on_lights', [JSON.stringify(request)]);
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -183,7 +195,18 @@ export class LightsService {
           ips: bulbs.map(bulb => bulb.ip)
         };
         const response = await this.processManager.executeScript('turn_off_lights', [JSON.stringify(request)]);
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: false },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -207,7 +230,18 @@ export class LightsService {
           'set_lights_warm_white',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, warmWhite: intensity, coldWhite: 0, rgb: undefined },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -231,7 +265,18 @@ export class LightsService {
           'set_lights_cold_white',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, coldWhite: intensity, warmWhite: 0, rgb: undefined },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -255,7 +300,18 @@ export class LightsService {
           'set_lights_color',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, rgb: color as [number, number, number], warmWhite: 0, coldWhite: 0 },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -321,6 +377,30 @@ export class LightsService {
     }
   }
 
+  private updateBulbStates(
+    ips: string[],
+    stateUpdates: Partial<BulbState>,
+    results?: Record<string, { success: boolean; message: string }>
+  ): void {
+    // For each IP in the list
+    ips.forEach(ip => {
+      // If we have results and this specific bulb action failed, skip it
+      if (results && results[ip] && !results[ip].success) {
+        return;
+      }
+      
+      // Find the bulb in our list
+      const bulbIndex = this.bulbs.findIndex(bulb => bulb.ip === ip);
+      if (bulbIndex !== -1) {
+        // Update the bulb state with the new values
+        this.bulbs[bulbIndex].state = {
+          ...this.bulbs[bulbIndex].state,
+          ...stateUpdates
+        };
+      }
+    });
+  }
+
   async turnOnLights(): Promise<LightResponse> {
     return this.executeWithTimeout(async () => {
       try {
@@ -328,7 +408,18 @@ export class LightsService {
           ips: this.bulbs.map(bulb => bulb.ip)
         };
         const response = await this.processManager.executeScript('turn_on_lights', [JSON.stringify(request)]);
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -345,7 +436,18 @@ export class LightsService {
           ips: this.bulbs.map(bulb => bulb.ip)
         };
         const response = await this.processManager.executeScript('turn_off_lights', [JSON.stringify(request)]);
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: false },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -368,7 +470,18 @@ export class LightsService {
           'set_lights_warm_white',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, warmWhite: intensity, coldWhite: 0, rgb: undefined },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -391,7 +504,18 @@ export class LightsService {
           'set_lights_cold_white',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, coldWhite: intensity, warmWhite: 0, rgb: undefined },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
@@ -414,7 +538,18 @@ export class LightsService {
           'set_lights_color',
           [JSON.stringify(request)]
         );
-        return this.parseResponse(response);
+        const parsedResponse = this.parseResponse(response);
+        
+        // If overall success or partial success, update the states of successful bulbs
+        if (parsedResponse.success || parsedResponse.overall_success) {
+          this.updateBulbStates(
+            request.ips,
+            { isOn: true, rgb: color as [number, number, number], warmWhite: 0, coldWhite: 0 },
+            parsedResponse.results
+          );
+        }
+        
+        return parsedResponse;
       } catch (error) {
         if (error instanceof LightControlError) {
           throw error;
