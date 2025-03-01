@@ -46,8 +46,34 @@ export class LightsService {
     return group;
   }
 
-  getAllGroups(): LightGroup[] {
-    return Array.from(this.groups.values());
+  getAllGroups(): (LightGroup & { isOn: boolean })[] {
+    return Array.from(this.groups.values()).map(group => ({
+      ...group,
+      isOn: this.isGroupOn(group.id)
+    }));
+  }
+
+  private isGroupOn(groupId: string): boolean {
+    const group = this.groups.get(groupId);
+    if (!group) return false;
+
+    // Check if all bulbs directly in this group are on
+    for (const bulbIp of group.bulbs) {
+      const bulb = this.bulbs.find(b => b.ip === bulbIp);
+      if (!bulb || !bulb.state.isOn) {
+        return false;
+      }
+    }
+
+    // Check if all child groups are on
+    for (const childId of group.childGroups) {
+      if (!this.isGroupOn(childId)) {
+        return false;
+      }
+    }
+
+    // If we get here, all bulbs and child groups are on
+    return true;
   }
 
   addBulbToGroup(groupId: string, bulbIp: string): void {
