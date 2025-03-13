@@ -1,5 +1,4 @@
-import { ChildProcess, spawn } from 'child_process';
-import { join } from 'path';
+import { ChildProcess } from 'child_process';
 import { SystemError } from '../errors/lightControlErrors';
 import { ProcessPool } from './processPool';
 import { EnvironmentManager } from './environmentManager';
@@ -95,14 +94,7 @@ export class ProcessManager {
   ): Promise<string> {
     try {
       // Ensure Python environment is initialized
-      console.log('Initialising environment manager')
       await this.envManager.initialize();
-      
-      // Get validated Python path
-      const pythonPath = this.envManager.getPythonPath();
-      
-      // Build script path
-      const scriptPath = join('python_scripts', `${scriptName}.py`);
       
       // Use ProcessPool for execution
       const result = await this.pool.executeScript(scriptName, args);

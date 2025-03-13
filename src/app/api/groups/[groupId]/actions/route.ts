@@ -18,7 +18,7 @@ interface GroupActionRequest {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const { groupId } = await params;

@@ -4,8 +4,11 @@ import { LightsService } from './lightsService';
 import { EnvironmentManager } from './environmentManager';
 
 declare global {
+  // eslint-disable-next-line no-var
   var __processManager: ProcessManager | undefined;
+  // eslint-disable-next-line no-var
   var __lightsService: LightsService | undefined;
+  // eslint-disable-next-line no-var
   var __environmentManager: EnvironmentManager | undefined;
 }
 
